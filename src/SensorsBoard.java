@@ -3,23 +3,46 @@ import IA.Red.CentrosDatos;
 import IA.Red.Sensor;
 import IA.Red.Sensores;
 
+import java.io.BufferedOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SensorsBoard {
 
-    private Integer totalCost;
-    private Integer totalInformation;
+    private int totalCost;
+    private double totalInformation;
 
-    private List<Sensor> sensorList;
-    private List<Centro> centroList;
+    private static List<Sensor> sensorList;
+    private static List<Centro> centroList;
 
-    private List<List<Integer>> connections;
+    private int[] connections;
+
+    public Integer getTotalCost() {
+        return totalCost;
+    }
+
+    public Double getTotalInformation() {
+        return totalInformation;
+    }
 
     public SensorsBoard() {
         sensorList = new ArrayList<>();
         centroList = new ArrayList<>();
-        connections = new ArrayList<>();
+
+        generateBoard();
+        connections = new int[sensorList.size()];
+
+        totalCost = 0;
+        totalInformation = 0D;
+
+        generateInitialState();
+    }
+
+    public SensorsBoard(SensorsBoard board) {
+        connections = new int[board.getProblemSize()];
+        System.arraycopy(board.connections, 0, connections, 0, board.connections.length);
+        totalCost = board.getTotalCost();
+        totalInformation = board.getTotalInformation();
     }
 
     private void generateBoard() {
@@ -31,47 +54,67 @@ public class SensorsBoard {
         centroList.addAll(new CentrosDatos(4, 123));
     }
 
-    private Integer calculateCost(Sensor sensor1, Sensor sensor2) {
+    private int calculateCost(Sensor sensor1, Sensor sensor2) {
         return (sensor1.getCoordX() - sensor2.getCoordX()) * (sensor1.getCoordX() - sensor2.getCoordX())
                 + (sensor1.getCoordY() - sensor2.getCoordY()) * (sensor1.getCoordY() - sensor2.getCoordY());
     }
 
-    private Integer calculateInformation(Sensor sensor1, Sensor sensor2) {
-        return 0;
+    private int calculateInformation(Sensor sensor1, Sensor sensor2) {
+        return 1;
     }
+
+    /*---- INITIAL STATES ----*/
 
     private void generateInitialState() {
         for (int i = 0; i < sensorList.size() - 1; i++) {
-            connections.get(i).add(i + 1);
+            connections[i] = i + 1;
             totalCost += calculateCost(sensorList.get(i), sensorList.get(i + 1));
             totalInformation += calculateInformation(sensorList.get(i), sensorList.get(i + 1));
         }
-        connections.get(sensorList.size() - 1).add(-1);
+        connections[sensorList.size() - 1] = -1;
     }
 
     /*---- OPERATORS ----*/
 
-    public void switchConnection(int sensor, int oldConnection, int newConnection) {
-        for (int i : connections.get(sensor)) {
-            if (i == oldConnection) {
-                connections.get(sensor).set(i, newConnection);
-                break;
+    public void swapConnection(int index) {
+        int aux = connections[index];
+
+        if (connections[index] >= 0) {
+            int oldCost = calculateCost(sensorList.get(index), sensorList.get(connections[index]));
+
+            connections[index] = connections[(index + 1) % sensorList.size()];
+            connections[(index + 1) % sensorList.size()] = aux;
+
+            if (connections[index] >= 0) {
+                int newCost = calculateCost(sensorList.get(index), sensorList.get(connections[index]));
+                totalCost += (newCost - oldCost);
             }
         }
     }
 
     /*---- HEURISTICS ----*/
 
-    public Integer costHeuristic() {
+    public int costHeuristic() {
         return totalCost;
     }
 
-    public Integer informationHeuristic() {
-        return totalInformation;
+    public double informationHeuristic() {
+        return 1 / totalInformation;
     }
 
-    public Integer superHeuristic() {
+    public double superHeuristic() {
         return totalCost / totalInformation;
     }
 
+    public boolean isGoal() {
+        return false;
+    }
+
+    public int getProblemSize() {
+        return sensorList.size();
+    }
+
+    public int[] getConnections() {
+        return connections;
+    }
 }
