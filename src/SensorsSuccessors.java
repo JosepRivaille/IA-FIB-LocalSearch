@@ -10,7 +10,7 @@ public class SensorsSuccessors implements SuccessorFunction {
         ArrayList<Successor> childrenStates = new ArrayList<>();
         SensorsBoard board = (SensorsBoard) state;
 
-        for (int i = 0; i < board.getProblemSize(); i++) {
+        for (int i = 0; i < board.getSensorsSize(); i++) {
             for (int j = 0; j < board.getProblemSize(); j++) {
                 if (i != j) {
                     SensorsBoard auxSensors = new SensorsBoard(board);

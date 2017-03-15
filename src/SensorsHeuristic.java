@@ -3,6 +3,6 @@ import aima.search.framework.HeuristicFunction;
 public class SensorsHeuristic implements HeuristicFunction {
 
     public double getHeuristicValue(Object n) {
-        return ((SensorsBoard) n).costHeuristic();
+        return ((SensorsBoard) n).superHeuristic();
     }
 }
