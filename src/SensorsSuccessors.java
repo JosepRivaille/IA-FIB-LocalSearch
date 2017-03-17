@@ -18,6 +18,8 @@ public class SensorsSuccessors implements SuccessorFunction {
                         childrenStates.add(new Successor("add connection " + i + " - " + j, auxSensors));
 
                         System.out.println(auxSensors.getTotalCost());
+                        System.out.println(auxSensors.getTotalInformation());
+                        System.out.println();
                     }
                 }
             }
