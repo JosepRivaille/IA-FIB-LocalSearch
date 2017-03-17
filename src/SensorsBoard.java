@@ -14,8 +14,9 @@ public class SensorsBoard {
     private Double totalCost;
     private Double totalInformation;
 
-    private static final Integer NUMBER_SENSORS = 4;
+    private static final Integer NUMBER_SENSORS = 100;
     private static final Integer NUMBER_CENTERS = 1;
+    private static final Integer GENERATOR_SEED = 1234;
 
     private static final Integer MAX_SENSOR_CONNECTIONS = 3;
     private static final Integer MAX_DATA_CENTER_CONNECTIONS = 25;
@@ -66,9 +67,9 @@ public class SensorsBoard {
      */
     private void generateBoard() {
         // TODO: Random
-        sensorList.addAll(new Sensores(NUMBER_SENSORS, 123));
+        sensorList.addAll(new Sensores(NUMBER_SENSORS, GENERATOR_SEED));
         // TODO: Random
-        centerList.addAll(new CentrosDatos(NUMBER_CENTERS, 123));
+        centerList.addAll(new CentrosDatos(NUMBER_CENTERS, GENERATOR_SEED));
     }
 
     /*---- INITIAL STATES ----*/
@@ -262,9 +263,10 @@ public class SensorsBoard {
             Double capacity = sensorList.get(sensorID).getCapacidad();
             List<Integer> inputSensors = sensorConnections.get(sensorID).inputSensors;
             if (inputSensors.isEmpty()) {
-                return capacity;
+                information += capacity;
+            } else {
+                information += capacity + Math.min(2 * capacity, recursiveCalculateInformation(inputSensors));
             }
-            information += capacity + Math.min(2 * capacity, recursiveCalculateInformation(inputSensors));
         }
         return information;
     }
