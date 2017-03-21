@@ -15,7 +15,7 @@ public class SensorsBoard {
     private Double totalInformation;
 
     private static final Integer NUMBER_SENSORS = 100;
-    private static final Integer NUMBER_CENTERS = 1;
+    private static final Integer NUMBER_CENTERS = 2;
     private static final Integer GENERATOR_SEED = 1234;
 
     private static final Integer MAX_SENSOR_CONNECTIONS = 3;
@@ -120,7 +120,7 @@ public class SensorsBoard {
 
             totalCost += second < sensorList.size()
                     ? calculateCost(first, sensorList.get(first), sensorList.get(second))
-                    : calculateCostDataCenters(first, sensorList.get(first), centerList.get(sensorList.size() - second));
+                    : calculateCostDataCenters(first, sensorList.get(first), centerList.get(second - sensorList.size()));
 
             totalInformation = calculateInformation();
 
@@ -279,26 +279,13 @@ public class SensorsBoard {
      * @return If the connection can be performed.
      */
     private boolean isAllowedConnection(int first, int second) {
-        if (second < sensorList.size()) {
-            // Already 3 incoming connections or outgoing connection
-            if (sensorConnections.get(second).inputSensors.size() == MAX_SENSOR_CONNECTIONS || sensorConnections.get(first).outputSensor != null) {
-                return false;
-            }
-        } else if (sensorConnections.get(second).inputSensors.size() == MAX_DATA_CENTER_CONNECTIONS) {
+        Integer maxConnections = second < sensorList.size() ? MAX_SENSOR_CONNECTIONS : MAX_DATA_CENTER_CONNECTIONS;
+        if (sensorConnections.get(first).outputSensor != null || sensorConnections.get(second).inputSensors.size() >= maxConnections) {
             return false;
         }
 
-        // Already connected first -> second (redundant)
-        Integer nextSensor = sensorConnections.get(first).outputSensor;
-        while (nextSensor != null) {
-            if (nextSensor == second) {
-                return false;
-            }
-            nextSensor = sensorConnections.get(nextSensor).outputSensor;
-        }
-
         // Already connected second -> first (cycle)
-        nextSensor = sensorConnections.get(second).outputSensor;
+        Integer nextSensor = sensorConnections.get(second).outputSensor;
         while (nextSensor != null) {
             if (nextSensor == first) {
                 return false;
