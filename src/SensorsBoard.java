@@ -15,7 +15,7 @@ public class SensorsBoard {
     private Double totalInformation;
 
     private static final Integer NUMBER_SENSORS = 100;
-    private static final Integer NUMBER_CENTERS = 2;
+    private static final Integer NUMBER_CENTERS = 4;
     private static final Integer GENERATOR_SEED = 1234;
 
     private static final Integer MAX_SENSOR_CONNECTIONS = 3;
@@ -25,6 +25,9 @@ public class SensorsBoard {
     private static List<Centro> centerList;
 
     private List<SensorConnections> sensorConnections;
+
+    static Double COST;
+    static Double INFORMATION;
 
     /**
      * Default constructor
@@ -39,7 +42,8 @@ public class SensorsBoard {
         totalCost = 0D;
         totalInformation = 0D;
 
-        generateEmptyInitialState();
+        //generateEmptyInitialState();
+        generateDummyInitialState();
     }
 
     /**
@@ -66,9 +70,7 @@ public class SensorsBoard {
      * Generates random board with N sensors and N data centers given a seed.
      */
     private void generateBoard() {
-        // TODO: Random
         sensorList.addAll(new Sensores(NUMBER_SENSORS, GENERATOR_SEED));
-        // TODO: Random
         centerList.addAll(new CentrosDatos(NUMBER_CENTERS, GENERATOR_SEED));
     }
 
@@ -85,7 +87,7 @@ public class SensorsBoard {
     }
 
     /**
-     * Intial state generation with random sequential connections.
+     * Initial state generation with random sequential connections.
      */
     private void generateDummyInitialState() {
         for (int i = 0; i < sensorList.size() - 1; i++) {
@@ -94,14 +96,30 @@ public class SensorsBoard {
                 inputs.add(i - 1);
             }
             sensorConnections.add(new SensorConnections(i + 1, inputs));
-            //totalCost += calculateCost(first, sensorList.get(i), sensorList.get(i + 1));
-            //totalInformation += calculateInformation(sensorList.get(i), sensorList.get(i + 1));
+            totalCost += calculateCost(i, sensorList.get(i), sensorList.get(i + 1));
         }
         List<Integer> inputs = new ArrayList<>();
         inputs.add(sensorList.size() - 2);
-        sensorConnections.add(new SensorConnections(null, inputs));
-        //totalCost += calculateCost(first, sensorList.get(sensorList.size() - 2), sensorList.get(sensorList.size() - 1));
-        //totalInformation += calculateInformation(sensorList.get(sensorList.size() - 2), sensorList.get(sensorList.size() - 1));
+        sensorConnections.add(new SensorConnections(sensorList.size(), inputs));
+
+        for (int i = 0; i < centerList.size(); i++) {
+            inputs = new ArrayList<>();
+            if (i == 0) {
+                inputs.add(sensorList.size() - 1);
+            }
+            sensorConnections.add(new SensorConnections(null, inputs));
+        }
+
+        totalCost += calculateCostDataCenters(sensorList.size() - 1, sensorList.get(sensorList.size() - 1), centerList.get(0));
+
+        totalInformation += calculateInformation();
+    }
+
+    /**
+     * Initial state generation with greedy algorithm.
+     */
+    private void generateGreedyInitialState() {
+
     }
 
     /*---- OPERATORS ----*/
@@ -175,7 +193,7 @@ public class SensorsBoard {
      * @return Heuristic value.
      */
     Double costHeuristic() {
-        return totalCost * -1D;
+        return totalCost;
     }
 
     /**
@@ -183,8 +201,8 @@ public class SensorsBoard {
      *
      * @return Heuristic value.
      */
-    public double informationHeuristic() {
-        return totalInformation * -1D;
+    double informationHeuristic() {
+        return totalInformation;
     }
 
     /**
@@ -192,7 +210,7 @@ public class SensorsBoard {
      *
      * @return Heuristic value.
      */
-    public double superHeuristic() {
+    double superHeuristic() {
         return totalCost - Math.pow(totalInformation, 3);
     }
 
@@ -226,7 +244,7 @@ public class SensorsBoard {
     /**
      * Calculates the Euclidean distance between two sensors.
      *
-     * @param first
+     * @param first   First sensor id.
      * @param sensor1 First sensor with its coordinates.
      * @param sensor2 Second sensor with its coordinates.
      * @return Distance cost.
@@ -257,15 +275,15 @@ public class SensorsBoard {
         return totalInformation;
     }
 
-    private Double recursiveCalculateInformation(List<Integer> sensors) {
+    private Double recursiveCalculateInformation(List<Integer> inputSensors) {
         Double information = 0D;
-        for (Integer sensorID : sensors) {
+        for (Integer sensorID : inputSensors) {
             Double capacity = sensorList.get(sensorID).getCapacidad();
-            List<Integer> inputSensors = sensorConnections.get(sensorID).inputSensors;
+            List<Integer> nextInputSensors = sensorConnections.get(sensorID).inputSensors;
             if (inputSensors.isEmpty()) {
                 information += capacity;
             } else {
-                information += capacity + Math.min(2 * capacity, recursiveCalculateInformation(inputSensors));
+                information += capacity + Math.min(2 * capacity, recursiveCalculateInformation(nextInputSensors));
             }
         }
         return information;
@@ -314,7 +332,7 @@ public class SensorsBoard {
      *
      * @return Cost of the current configuration.
      */
-    Double getTotalCost() {
+    private Double getTotalCost() {
         return totalCost;
     }
 
@@ -323,7 +341,7 @@ public class SensorsBoard {
      *
      * @return Information value of the current configuration.
      */
-    Double getTotalInformation() {
+    private Double getTotalInformation() {
         return totalInformation;
     }
 

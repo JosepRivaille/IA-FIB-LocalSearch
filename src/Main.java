@@ -22,10 +22,13 @@ public class Main {
         SearchAgent agent = new SearchAgent(p, alg);
 
         // We print the results of the search
-        System.out.println();
         printActions(agent.getActions());
         printInstrumentation(agent.getInstrumentation());
 
+        // We print cost and information
+        System.out.println();
+        System.out.println("Total cost -> " + SensorsBoard.COST);
+        System.out.println("Total information -> " + SensorsBoard.INFORMATION);
     }
 
     private static void printInstrumentation(Properties properties) {
