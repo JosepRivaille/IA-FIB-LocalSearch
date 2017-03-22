@@ -13,26 +13,8 @@ public class SensorsSuccessors implements SuccessorFunction {
         SensorsBoard.COST = board.costHeuristic();
         SensorsBoard.INFORMATION = board.informationHeuristic();
 
-        for (int i = 0; i < board.getSensorsSize(); i++) {
-            for (int j = 0; j < board.getProblemSize(); j++) {
-                if (i != j) {
-                    SensorsBoard auxSensors = new SensorsBoard(board);
-                    if (auxSensors.addConnection(i, j)) {
-                        childrenStates.add(new Successor("add connection " + i + " - " + j, auxSensors));
-                    }
-                }
-            }
-        }
-        for (int i = 0; i < board.getSensorsSize(); i++) {
-            for (int j = 0; j < board.getProblemSize(); j++) {
-                if (i != j) {
-                    SensorsBoard auxSensors = new SensorsBoard(board);
-                    if (auxSensors.removeConnection(i, j)) {
-                        childrenStates.add(new Successor("remove connection " + i + " - " + j, auxSensors));
-                    }
-                }
-            }
-        }
+        System.out.println(SensorsBoard.COST + " - " + SensorsBoard.INFORMATION + " -> " + board.superHeuristic());
+
         for (int i = 0; i < board.getSensorsSize(); i++) {
             for (int j = 0; j < board.getProblemSize(); j++) {
                 if (i != j) {

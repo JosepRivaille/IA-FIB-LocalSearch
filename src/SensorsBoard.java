@@ -4,6 +4,8 @@ import IA.Red.Sensor;
 import IA.Red.Sensores;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -43,7 +45,8 @@ class SensorsBoard {
         totalInformation = 0D;
 
         //generateEmptyInitialState();
-        generateDummyInitialState();
+        //generateDummyInitialState();
+        generateGreedyInitialState();
     }
 
     /**
@@ -53,6 +56,7 @@ class SensorsBoard {
      */
     SensorsBoard(SensorsBoard board) {
 
+        //sensorConnections = board.getSensorConnections();
         sensorConnections = new ArrayList<>();
         for (int i = 0; i < getProblemSize(); i++) {
             List<Integer> inputs = new ArrayList<>();
@@ -96,7 +100,7 @@ class SensorsBoard {
                 inputs.add(i - 1);
             }
             sensorConnections.add(new SensorConnections(i + 1, inputs));
-            totalCost += calculateCost(i, sensorList.get(i), sensorList.get(i + 1));
+            totalCost += calculateCostSensors(i, sensorList.get(i), sensorList.get(i + 1));
         }
         List<Integer> inputs = new ArrayList<>();
         inputs.add(sensorList.size() - 2);
@@ -112,55 +116,57 @@ class SensorsBoard {
 
         totalCost += calculateCostDataCenters(sensorList.size() - 1, sensorList.get(sensorList.size() - 1), centerList.get(0));
 
-        totalInformation += calculateInformation();
+        totalInformation = calculateInformation();
+    }
+
+    private void generateGreedyInitialState() {
+
+        Collections.sort(sensorList, new Comparator<Sensor>() {
+            @Override
+            public int compare(Sensor sensor1, Sensor sensor2) {
+                return ((Double) (sensor2.getCapacidad() - sensor1.getCapacidad())).intValue();
+            }
+        });
+
+        for (int i = 0; i < getProblemSize(); i++) {
+            List<Integer> inputs = new ArrayList<>();
+            sensorConnections.add(new SensorConnections(null, inputs));
+        }
+
+        Integer currentCenter = sensorList.size();
+        Integer sensorID = 0;
+        for (; sensorID < sensorList.size(); sensorID++) {
+            if (sensorConnections.get(currentCenter).inputSensors.size() >= MAX_DATA_CENTER_CONNECTIONS) {
+                currentCenter++;
+            }
+            if (currentCenter < getProblemSize()) {
+                sensorConnections.get(sensorID).outputSensor = currentCenter;
+                sensorConnections.get(currentCenter).inputSensors.add(sensorID);
+                totalCost += calculateCostDataCenters(sensorID, sensorList.get(sensorID), centerList.get(currentCenter % sensorList.size()));
+            } else {
+                break;
+            }
+        }
+
+        Integer currentSensor = 0;
+        for (; sensorID < sensorList.size(); sensorID++) {
+            if (sensorConnections.get(currentSensor).inputSensors.size() >= MAX_SENSOR_CONNECTIONS) {
+                currentSensor++;
+            } else {
+                sensorConnections.get(sensorID).outputSensor = currentSensor;
+                sensorConnections.get(currentSensor).inputSensors.add(sensorID);
+                totalCost += calculateCostSensors(sensorID, sensorList.get(sensorID), sensorList.get(currentSensor));
+            }
+        }
+
+        totalInformation = calculateInformation();
     }
 
     /*---- OPERATORS ----*/
 
-    /**
-     * Adds a connection between two sensors.
-     *
-     * @param first  Sensor from that will be an output connection.
-     * @param second Sensor that will receive the input connection.
-     * @return If connection has been added.
-     */
-    boolean addConnection(int first, int second) {
-        if (isAllowedConnection(first, second)) {
-            sensorConnections.get(second).inputSensors.add(first);
-            sensorConnections.get(first).outputSensor = second;
-
-            totalCost += calculatePartialCost(first, second);
-            totalInformation = calculateInformation();
-
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Removes a connection between two sensors.
-     *
-     * @param first  Sensor from that we wil will be an output connection.
-     * @param second Sensor that will receive the input connection.
-     * @return If connection has been removed.
-     */
-    boolean removeConnection(int first, int second) {
-        for (int i = 0; i < sensorConnections.get(second).inputSensors.size(); ++i) {
-            if (sensorConnections.get(second).inputSensors.get(i) == first) {
-
-                totalCost -= calculatePartialCost(first, second);
-
-                sensorConnections.get(second).inputSensors.remove(i);
-                sensorConnections.get(first).outputSensor = null;
-                return true;
-            }
-        }
-        return false;
-    }
-
     private Double calculatePartialCost(int first, int second) {
         return second < sensorList.size()
-                ? calculateCost(first, sensorList.get(first), sensorList.get(second))
+                ? calculateCostSensors(first, sensorList.get(first), sensorList.get(second))
                 : calculateCostDataCenters(first, sensorList.get(first), centerList.get(second - sensorList.size()));
     }
 
@@ -172,24 +178,22 @@ class SensorsBoard {
      * @return If connection has been swapped.
      */
     boolean swapConnection(int first, int second) {
-        if (sensorConnections.get(first).outputSensor != null) {
-            Integer oldEndConnection = sensorConnections.get(first).outputSensor;
-            if (second == oldEndConnection) {
-                return false;
-            } else {
-                for (int i = 0; i < sensorConnections.get(oldEndConnection).inputSensors.size(); i++) {
-                    if (sensorConnections.get(oldEndConnection).inputSensors.get(i) == first) {
-                        sensorConnections.get(oldEndConnection).inputSensors.remove(i);
-                        Double oldCost = calculatePartialCost(first, oldEndConnection);
-                        if (addConnection(first, second)) {
-                            totalCost += (calculatePartialCost(first, second) - oldCost);
-                            totalInformation = calculateInformation();
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                }
+        Integer oldEndConnection = sensorConnections.get(first).outputSensor;
+        if (second == oldEndConnection || !isAllowedConnection(first, second)) {
+            return false;
+        }
+
+        for (int i = 0; i < sensorConnections.get(oldEndConnection).inputSensors.size(); i++) {
+            if (sensorConnections.get(oldEndConnection).inputSensors.get(i) == first) {
+                Double oldCost = calculatePartialCost(first, oldEndConnection);
+
+                sensorConnections.get(oldEndConnection).inputSensors.remove(i);
+                sensorConnections.get(first).outputSensor = second;
+                sensorConnections.get(second).inputSensors.add(first);
+
+                totalCost += (calculatePartialCost(first, second) - oldCost);
+                totalInformation = calculateInformation();
+                return true;
             }
         }
         return false;
@@ -221,7 +225,7 @@ class SensorsBoard {
      * @return Heuristic value.
      */
     double superHeuristic() {
-        return totalCost - Math.pow(totalInformation, 4);
+        return totalCost - Math.pow(totalInformation, 2);
     }
 
     /*-------------- Goal functions --------------*/
@@ -231,6 +235,7 @@ class SensorsBoard {
      *
      * @return Is a goal state.
      */
+    //TODO: Noob
     boolean isGoal() {
         return false;
     }
@@ -259,10 +264,9 @@ class SensorsBoard {
      * @param sensor2 Second sensor with its coordinates and capacity.
      * @return Distance cost.
      */
-    private Double calculateCost(int first, Sensor sensor1, Sensor sensor2) {
-        return Math.sqrt((sensor1.getCoordX() - sensor2.getCoordX()) * (sensor1.getCoordX() - sensor2.getCoordX())
-                + (sensor1.getCoordY() - sensor2.getCoordY()) * (sensor1.getCoordY() - sensor2.getCoordY()))
-                * (sensor1.getCapacidad() + Math.min(sensor1.getCapacidad(), recursiveCalculateInformation(sensorConnections.get(first).inputSensors)));
+    private Double calculateCostSensors(int first, Sensor sensor1, Sensor sensor2) {
+        return (Math.pow(sensor1.getCoordX() - sensor2.getCoordX(), 2) + Math.pow(sensor1.getCoordY() - sensor2.getCoordY(), 2))
+                * (sensor1.getCapacidad() + Math.min(2 * sensor1.getCapacidad(), recursiveCalculateInformation(sensorConnections.get(first).inputSensors)));
     }
 
     /**
@@ -274,9 +278,8 @@ class SensorsBoard {
      * @return Distance cost.
      */
     private Double calculateCostDataCenters(int first, Sensor sensor, Centro dataCenter) {
-        return Math.sqrt((sensor.getCoordX() - dataCenter.getCoordX()) * (sensor.getCoordX() - dataCenter.getCoordX())
-                + (sensor.getCoordY() - dataCenter.getCoordY()) * (sensor.getCoordY() - dataCenter.getCoordY()))
-                * (sensor.getCapacidad() + Math.min(sensor.getCapacidad(), recursiveCalculateInformation(sensorConnections.get(first).inputSensors)));
+        return (Math.pow(sensor.getCoordX() - dataCenter.getCoordX(), 2) + Math.pow(sensor.getCoordY() - dataCenter.getCoordY(), 2))
+                * (sensor.getCapacidad() + Math.min(2 * sensor.getCapacidad(), recursiveCalculateInformation(sensorConnections.get(first).inputSensors)));
     }
 
     /**
@@ -322,7 +325,7 @@ class SensorsBoard {
      */
     private boolean isAllowedConnection(int first, int second) {
         Integer maxConnections = second < sensorList.size() ? MAX_SENSOR_CONNECTIONS : MAX_DATA_CENTER_CONNECTIONS;
-        if (sensorConnections.get(first).outputSensor != null || sensorConnections.get(second).inputSensors.size() >= maxConnections) {
+        if (sensorConnections.get(second).inputSensors.size() >= maxConnections) {
             return false;
         }
 
