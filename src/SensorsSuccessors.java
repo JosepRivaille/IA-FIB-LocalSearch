@@ -33,6 +33,16 @@ public class SensorsSuccessors implements SuccessorFunction {
                 }
             }
         }
+        for (int i = 0; i < board.getSensorsSize(); i++) {
+            for (int j = 0; j < board.getProblemSize(); j++) {
+                if (i != j) {
+                    SensorsBoard auxSensors = new SensorsBoard(board);
+                    if (auxSensors.swapConnection(i, j)) {
+                        childrenStates.add(new Successor("swap connection " + i + " - " + j, auxSensors));
+                    }
+                }
+            }
+        }
 
         return childrenStates;
     }

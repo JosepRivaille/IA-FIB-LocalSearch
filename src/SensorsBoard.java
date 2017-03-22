@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Representation of the board with sensors and data centers information.
  */
-public class SensorsBoard {
+class SensorsBoard {
 
     private Double totalCost;
     private Double totalInformation;
@@ -115,13 +115,6 @@ public class SensorsBoard {
         totalInformation += calculateInformation();
     }
 
-    /**
-     * Initial state generation with greedy algorithm.
-     */
-    private void generateGreedyInitialState() {
-
-    }
-
     /*---- OPERATORS ----*/
 
     /**
@@ -136,10 +129,7 @@ public class SensorsBoard {
             sensorConnections.get(second).inputSensors.add(first);
             sensorConnections.get(first).outputSensor = second;
 
-            totalCost += second < sensorList.size()
-                    ? calculateCost(first, sensorList.get(first), sensorList.get(second))
-                    : calculateCostDataCenters(first, sensorList.get(first), centerList.get(second - sensorList.size()));
-
+            totalCost += calculatePartialCost(first, second);
             totalInformation = calculateInformation();
 
             return true;
@@ -152,11 +142,14 @@ public class SensorsBoard {
      *
      * @param first  Sensor from that we wil will be an output connection.
      * @param second Sensor that will receive the input connection.
-     * @return If
+     * @return If connection has been removed.
      */
     boolean removeConnection(int first, int second) {
         for (int i = 0; i < sensorConnections.get(second).inputSensors.size(); ++i) {
             if (sensorConnections.get(second).inputSensors.get(i) == first) {
+
+                totalCost -= calculatePartialCost(first, second);
+
                 sensorConnections.get(second).inputSensors.remove(i);
                 sensorConnections.get(first).outputSensor = null;
                 return true;
@@ -165,27 +158,44 @@ public class SensorsBoard {
         return false;
     }
 
-    // TODO: Peta fort
-    public void swapConnection(int index) {
-
-        //Double oldCost = calculateCost(first, sensorList.get(index), sensorList.get(sensorConnections.get(index).outputSensor));
-
-        // Swap outputs
-        int aux = sensorConnections.get(index).outputSensor;
-        sensorConnections.get(index).outputSensor = sensorConnections.get((index + 1) % sensorList.size()).outputSensor;
-        sensorConnections.get((index + 1) % sensorList.size()).outputSensor = aux;
-
-        // Swap inputs
-        List<Integer> aux2 = sensorConnections.get(index).inputSensors;
-        sensorConnections.get(index).inputSensors = sensorConnections.get((index + 1) % sensorList.size()).inputSensors;
-        sensorConnections.get((index + 1) % sensorList.size()).inputSensors = aux2;
-
-        if (sensorConnections.get(index).outputSensor < sensorList.size()) {
-            //totalCost += (calculateCost(first, sensorList.get(index), sensorList.get(sensorConnections.get(index).outputSensor)) - oldCost);
-        }
+    private Double calculatePartialCost(int first, int second) {
+        return second < sensorList.size()
+                ? calculateCost(first, sensorList.get(first), sensorList.get(second))
+                : calculateCostDataCenters(first, sensorList.get(first), centerList.get(second - sensorList.size()));
     }
 
-    /*---- HEURISTICS ----*/
+    /**
+     * Swaps output connection from first sensor to a second one.
+     *
+     * @param first  Sensor from that we will swap its output connection.
+     * @param second Sensor that will receive the new input connection.
+     * @return If connection has been swapped.
+     */
+    boolean swapConnection(int first, int second) {
+        if (sensorConnections.get(first).outputSensor != null) {
+            Integer oldEndConnection = sensorConnections.get(first).outputSensor;
+            if (second == oldEndConnection) {
+                return false;
+            } else {
+                for (int i = 0; i < sensorConnections.get(oldEndConnection).inputSensors.size(); i++) {
+                    if (sensorConnections.get(oldEndConnection).inputSensors.get(i) == first) {
+                        sensorConnections.get(oldEndConnection).inputSensors.remove(i);
+                        Double oldCost = calculatePartialCost(first, oldEndConnection);
+                        if (addConnection(first, second)) {
+                            totalCost += (calculatePartialCost(first, second) - oldCost);
+                            totalInformation = calculateInformation();
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /*-------------- HEURISTICS --------------*/
 
     /**
      * Heuristic based on cost.
@@ -211,10 +221,10 @@ public class SensorsBoard {
      * @return Heuristic value.
      */
     double superHeuristic() {
-        return totalCost - Math.pow(totalInformation, 3);
+        return totalCost - Math.pow(totalInformation, 4);
     }
 
-    /*---- Goal functions ----*/
+    /*-------------- Goal functions --------------*/
 
     /**
      * Checks if it's a goal solution state.
@@ -225,7 +235,7 @@ public class SensorsBoard {
         return false;
     }
 
-    /*---- Auxiliary classes and functions ----*/
+    /*-------------- Auxiliary classes and functions --------------*/
 
     /**
      * Representation of a sensor input and output connections.
@@ -245,8 +255,8 @@ public class SensorsBoard {
      * Calculates the Euclidean distance between two sensors.
      *
      * @param first   First sensor id.
-     * @param sensor1 First sensor with its coordinates.
-     * @param sensor2 Second sensor with its coordinates.
+     * @param sensor1 First sensor with its coordinates and capacity.
+     * @param sensor2 Second sensor with its coordinates and capacity.
      * @return Distance cost.
      */
     private Double calculateCost(int first, Sensor sensor1, Sensor sensor2) {
@@ -255,6 +265,14 @@ public class SensorsBoard {
                 * (sensor1.getCapacidad() + Math.min(sensor1.getCapacidad(), recursiveCalculateInformation(sensorConnections.get(first).inputSensors)));
     }
 
+    /**
+     * Calculates  the Euclidean distance between a sensor and a data center.
+     *
+     * @param first      Sensor id.
+     * @param sensor     Sensor with its coordinates and capacity.
+     * @param dataCenter Data center with its coordinates
+     * @return Distance cost.
+     */
     private Double calculateCostDataCenters(int first, Sensor sensor, Centro dataCenter) {
         return Math.sqrt((sensor.getCoordX() - dataCenter.getCoordX()) * (sensor.getCoordX() - dataCenter.getCoordX())
                 + (sensor.getCoordY() - dataCenter.getCoordY()) * (sensor.getCoordY() - dataCenter.getCoordY()))
@@ -275,6 +293,12 @@ public class SensorsBoard {
         return totalInformation;
     }
 
+    /**
+     * Recursive calculation of input sensors information.
+     *
+     * @param inputSensors List of input sensors to iterate.
+     * @return Accumulated information value for each input sensor.
+     */
     private Double recursiveCalculateInformation(List<Integer> inputSensors) {
         Double information = 0D;
         for (Integer sensorID : inputSensors) {
