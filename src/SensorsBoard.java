@@ -11,8 +11,8 @@ import java.util.List;
  */
 class SensorsBoard {
 
-    private Double totalCost;
     private Double totalInformation;
+    private Double totalCost;
 
     private static final Integer NUMBER_SENSORS = 100;
     private static final Integer NUMBER_CENTERS = 4;
@@ -39,9 +39,6 @@ class SensorsBoard {
         generateBoard();
         sensorConnections = new ArrayList<>(sensorList.size());
 
-        totalCost = 0D;
-        totalInformation = 0D;
-
         //generateEmptyInitialState();
         //generateDummyInitialState();
         generateGreedyInitialState();
@@ -63,8 +60,8 @@ class SensorsBoard {
             sensorConnections.add(new SensorNode(board.sensorConnections.get(i).getOutputSensor(), inputs));
         }
 
-        totalCost = board.getTotalCost();
-        totalInformation = board.getTotalInformation();
+        totalInformation = board.totalInformation;
+        totalCost = board.totalCost;
     }
 
     /**
@@ -88,7 +85,6 @@ class SensorsBoard {
                 inputs.add(i - 1);
             }
             sensorConnections.add(new SensorNode(i + 1, inputs));
-            totalCost += calculateCostSensors(i, sensorList.get(i), sensorList.get(i + 1));
         }
         List<Integer> inputs = new ArrayList<>();
         inputs.add(sensorList.size() - 2);
@@ -101,10 +97,6 @@ class SensorsBoard {
             }
             sensorConnections.add(new SensorNode(null, inputs));
         }
-
-        totalCost += calculateCostDataCenters(sensorList.size() - 1, sensorList.get(sensorList.size() - 1), centerList.get(0));
-
-        totalInformation = calculateInformation();
     }
 
     /**
@@ -128,7 +120,6 @@ class SensorsBoard {
             if (currentCenter < getProblemSize()) {
                 sensorConnections.get(sensorID).setOutputSensor(currentCenter);
                 sensorConnections.get(currentCenter).addInput(sensorID);
-                totalCost += calculateCostDataCenters(sensorID, sensorList.get(sensorID), centerList.get(currentCenter % sensorList.size()));
             } else {
                 break;
             }
@@ -141,13 +132,19 @@ class SensorsBoard {
             } else {
                 sensorConnections.get(sensorID).setOutputSensor(currentSensor);
                 sensorConnections.get(currentSensor).addInput(sensorID);
-                totalCost += calculateCostSensors(sensorID, sensorList.get(sensorID), sensorList.get(currentSensor));
-
             }
         }
 
-        totalInformation = calculateInformation();
-        //totalCost = calculateCost();
+        totalCost = 0D;
+        totalInformation = 0D;
+        for (currentCenter = sensorList.size(); currentCenter < getProblemSize(); currentCenter++) {
+            Pair<Double, Double> data = calculateData(currentCenter, sensorConnections.get(currentCenter).getInputs());
+            sensorConnections.get(currentCenter).setInformation(data.getInformation());
+            sensorConnections.get(currentCenter).setCost(data.getCost());
+
+            totalInformation += data.getInformation();
+            totalCost += data.getCost();
+        }
     }
 
     /*---- OPERATORS ----*/
@@ -173,14 +170,11 @@ class SensorsBoard {
 
         for (int i = 0; i < sensorConnections.get(oldEndConnection).getInputsCount(); i++) {
             if (sensorConnections.get(oldEndConnection).getInput(i) == first) {
-                Double oldCost = calculatePartialCost(first, oldEndConnection);
 
                 sensorConnections.get(oldEndConnection).removeInput(i);
                 sensorConnections.get(first).setOutputSensor(second);
                 sensorConnections.get(second).addInput(first);
 
-                totalCost += (calculatePartialCost(first, second) - oldCost);
-                totalInformation = calculateInformation();
                 return true;
             }
         }
@@ -253,6 +247,43 @@ class SensorsBoard {
     private Double calculateCostDataCenters(int first, Sensor sensor, Centro dataCenter) {
         return (Math.pow(sensor.getCoordX() - dataCenter.getCoordX(), 2) + Math.pow(sensor.getCoordY() - dataCenter.getCoordY(), 2))
                 * (sensor.getCapacidad() + Math.min(2 * sensor.getCapacidad(), recursiveCalculateInformation(sensorConnections.get(first).getInputSensors())));
+    }
+
+    /**
+     * Recursive calculation of information and cost
+     *
+     * @param inputs List of input sensors to iterate.
+     */
+    private Pair<Double, Double> calculateData(Integer nodeID, List<Integer> inputs) {
+        if (inputs.isEmpty()) {
+            // Leaf has no cost.
+            sensorConnections.get(nodeID).setCost(0D);
+            // Leaf information is its own information.
+            Double information = nodeID < sensorList.size() ? sensorList.get(nodeID).getCapacidad() : 0D;
+            sensorConnections.get(nodeID).setCost(information);
+
+            Double distance = nodeID < sensorList.size() ? calculateOutputDistance(nodeID) : 0D;
+            return new Pair<>(information, information * distance);
+        }
+
+        SensorNode currentNode = sensorConnections.get(nodeID);
+        for (Integer input : inputs) {
+            Pair<Double, Double> aux = calculateData(input, sensorConnections.get(input).getInputs());
+
+            sensorConnections.get(nodeID).setInformation(currentNode.getInformation() + aux.getInformation());
+            sensorConnections.get(nodeID).setCost(currentNode.getCost() + aux.getCost());
+        }
+
+        Double distance = nodeID < sensorList.size() ? calculateOutputDistance(nodeID) : 0D;
+        return new Pair<>(currentNode.getInformation(), currentNode.getCost() + (currentNode.getInformation() * distance));
+    }
+
+    private Double calculateOutputDistance(Integer sensorID) {
+        Integer outputID = sensorConnections.get(sensorID).getOutputSensor();
+        Integer xOutput = outputID < sensorList.size() ? sensorList.get(outputID).getCoordX() : centerList.get(outputID % sensorList.size()).getCoordX();
+        Integer yOutput = outputID < sensorList.size() ? sensorList.get(outputID).getCoordY() : centerList.get(outputID % sensorList.size()).getCoordY();
+        return (Math.pow(sensorList.get(sensorID).getCoordX() - xOutput, 2)
+                + Math.pow(sensorList.get(sensorID).getCoordY() - yOutput, 2));
     }
 
     /**
@@ -348,6 +379,26 @@ class SensorsBoard {
      */
     private Double getTotalInformation() {
         return totalInformation;
+    }
+
+    private class Pair<I, C> {
+
+        private I information;
+        private C cost;
+
+        Pair(I information, C cost) {
+            this.information = information;
+            this.cost = cost;
+        }
+
+        I getInformation() {
+            return information;
+        }
+
+        C getCost() {
+            return cost;
+        }
+
     }
 
 }

@@ -63,4 +63,8 @@ class SensorNode {
     void removeInput(int index) {
         inputSensors.remove(index);
     }
+
+    public List<Integer> getInputs() {
+        return inputSensors;
+    }
 }
