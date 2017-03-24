@@ -21,6 +21,8 @@ class SensorsBoard {
     private static final Integer MAX_SENSOR_CONNECTIONS = 3;
     private static final Integer MAX_DATA_CENTER_CONNECTIONS = 25;
 
+    private static final Double INFORMATION_WEIGHT = 2.25;
+
     private static List<Sensor> sensorList;
     private static List<Centro> centerList;
 
@@ -135,6 +137,11 @@ class SensorsBoard {
             }
         }
 
+        recalculateBoardData();
+    }
+
+    private void recalculateBoardData() {
+        Integer currentCenter;
         totalCost = 0D;
         totalInformation = 0D;
         for (currentCenter = sensorList.size(); currentCenter < getProblemSize(); currentCenter++) {
@@ -166,25 +173,25 @@ class SensorsBoard {
             if (sensorConnections.get(oldEndConnection).getInput(i) == first) {
 
                 // Subtract old upstream connections cost and information.
-                Double oldCost = sensorConnections.get(first).getCost();
+/*                Double oldCost = sensorConnections.get(first).getCost();
                 Double oldInformation = sensorConnections.get(first).getInformation();
                 Double oldDistance = calculateOutputDistance(first);
 
                 Integer parent = sensorConnections.get(first).getOutputSensor();
                 while (parent != null) {
-                    sensorConnections.get(parent).addInformation(-oldCost);
+                    sensorConnections.get(parent).addCost(-oldCost);
                     sensorConnections.get(parent).addInformation(-oldInformation);
                     //TODO: Sensor supera limit info -> no restar tot
                     //TODO: Al totalitzar, guardar total i pujar min(maxVal, total)
 
                     parent = sensorConnections.get(parent).getOutputSensor();
-                }
+                }*/
 
                 sensorConnections.get(oldEndConnection).removeInput(i);
                 sensorConnections.get(first).setOutputSensor(second);
                 sensorConnections.get(second).addInput(first);
 
-                // Add new upstream connections cost and information.
+ /*               // Add new upstream connections cost and information.
                 Double information = sensorConnections.get(first).getInformation();
                 Double distanceDifference = calculateOutputDistance(first) - oldDistance;
                 sensorConnections.get(first).addCost(distanceDifference);
@@ -202,8 +209,9 @@ class SensorsBoard {
 
                     parent = sensorConnections.get(parent).getOutputSensor();
                 }
+*/
 
-
+                recalculateBoardData();
                 return true;
             }
         }
@@ -236,7 +244,7 @@ class SensorsBoard {
      * @return Heuristic value.
      */
     Double superHeuristic() {
-        return totalCost - Math.pow(totalInformation, 3);
+        return totalCost - Math.pow(totalInformation, INFORMATION_WEIGHT);
     }
 
     /*-------------- Goal functions --------------*/
@@ -247,6 +255,7 @@ class SensorsBoard {
      * @return Is a goal state.
      */
     boolean isGoal() {
+        //TODO: ?
         return false;
     }
 
