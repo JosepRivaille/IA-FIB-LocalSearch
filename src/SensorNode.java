@@ -20,19 +20,27 @@ class SensorNode {
         this.inputSensors = inputSensors;
     }
 
-    public Double getCost() {
+    Double getCost() {
         return cost;
     }
 
-    public void setCost(Double cost) {
+    void setCost(Double cost) {
         this.cost = cost;
     }
 
-    public Double getInformation() {
+    void addCost(Double cost) {
+        this.cost += cost;
+    }
+
+    void addInformation(Double information) {
+        this.information += information;
+    }
+
+    Double getInformation() {
         return information;
     }
 
-    public void setInformation(Double information) {
+    void setInformation(Double information) {
         this.information = information;
     }
 
@@ -64,7 +72,7 @@ class SensorNode {
         inputSensors.remove(index);
     }
 
-    public List<Integer> getInputs() {
+    List<Integer> getInputs() {
         return inputSensors;
     }
 }

@@ -60,8 +60,8 @@ class SensorsBoard {
             sensorConnections.add(new SensorNode(board.sensorConnections.get(i).getOutputSensor(), inputs));
         }
 
-        totalInformation = board.totalInformation;
-        totalCost = board.totalCost;
+        totalCost = board.getTotalCost();
+        totalInformation = board.getTotalInformation();
     }
 
     /**
@@ -149,12 +149,6 @@ class SensorsBoard {
 
     /*---- OPERATORS ----*/
 
-    private Double calculatePartialCost(int first, int second) {
-        return second < sensorList.size()
-                ? calculateCostSensors(first, sensorList.get(first), sensorList.get(second))
-                : calculateCostDataCenters(first, sensorList.get(first), centerList.get(second - sensorList.size()));
-    }
-
     /**
      * Swaps output connection from first sensor to a second one.
      *
@@ -171,9 +165,44 @@ class SensorsBoard {
         for (int i = 0; i < sensorConnections.get(oldEndConnection).getInputsCount(); i++) {
             if (sensorConnections.get(oldEndConnection).getInput(i) == first) {
 
+                // Subtract old upstream connections cost and information.
+                Double oldCost = sensorConnections.get(first).getCost();
+                Double oldInformation = sensorConnections.get(first).getInformation();
+                Double oldDistance = calculateOutputDistance(first);
+
+                Integer parent = sensorConnections.get(first).getOutputSensor();
+                while (parent != null) {
+                    sensorConnections.get(parent).addInformation(-oldCost);
+                    sensorConnections.get(parent).addInformation(-oldInformation);
+                    //TODO: Sensor supera limit info -> no restar tot
+                    //TODO: Al totalitzar, guardar total i pujar min(maxVal, total)
+
+                    parent = sensorConnections.get(parent).getOutputSensor();
+                }
+
                 sensorConnections.get(oldEndConnection).removeInput(i);
                 sensorConnections.get(first).setOutputSensor(second);
                 sensorConnections.get(second).addInput(first);
+
+                // Add new upstream connections cost and information.
+                Double information = sensorConnections.get(first).getInformation();
+                Double distanceDifference = calculateOutputDistance(first) - oldDistance;
+                sensorConnections.get(first).addCost(distanceDifference);
+
+                parent = sensorConnections.get(first).getOutputSensor();
+                while (parent != null) {
+                    sensorConnections.get(parent).addCost(distanceDifference);
+
+                    Double infoAux = parent < sensorList.size()
+                            ? Math.min(2 * sensorList.get(parent).getCapacidad(), information + sensorConnections.get(parent).getInformation())
+                            : information + sensorConnections.get(parent).getInformation();
+                    sensorConnections.get(parent).addInformation(infoAux);
+                    sensorConnections.get(parent).addCost(sensorConnections.get(first).getCost());
+                    //TODO: No tira
+
+                    parent = sensorConnections.get(parent).getOutputSensor();
+                }
+
 
                 return true;
             }
@@ -224,32 +253,6 @@ class SensorsBoard {
     /*-------------- Auxiliary classes and functions --------------*/
 
     /**
-     * Calculates the Euclidean distance between two sensors.
-     *
-     * @param first   First sensor id.
-     * @param sensor1 First sensor with its coordinates and capacity.
-     * @param sensor2 Second sensor with its coordinates and capacity.
-     * @return Distance cost.
-     */
-    private Double calculateCostSensors(int first, Sensor sensor1, Sensor sensor2) {
-        return (Math.pow(sensor1.getCoordX() - sensor2.getCoordX(), 2) + Math.pow(sensor1.getCoordY() - sensor2.getCoordY(), 2))
-                * (sensor1.getCapacidad() + Math.min(2 * sensor1.getCapacidad(), recursiveCalculateInformation(sensorConnections.get(first).getInputSensors())));
-    }
-
-    /**
-     * Calculates  the Euclidean distance between a sensor and a data center.
-     *
-     * @param first      Sensor id.
-     * @param sensor     Sensor with its coordinates and capacity.
-     * @param dataCenter Data center with its coordinates
-     * @return Distance cost.
-     */
-    private Double calculateCostDataCenters(int first, Sensor sensor, Centro dataCenter) {
-        return (Math.pow(sensor.getCoordX() - dataCenter.getCoordX(), 2) + Math.pow(sensor.getCoordY() - dataCenter.getCoordY(), 2))
-                * (sensor.getCapacidad() + Math.min(2 * sensor.getCapacidad(), recursiveCalculateInformation(sensorConnections.get(first).getInputSensors())));
-    }
-
-    /**
      * Recursive calculation of information and cost
      *
      * @param inputs List of input sensors to iterate.
@@ -284,40 +287,6 @@ class SensorsBoard {
         Integer yOutput = outputID < sensorList.size() ? sensorList.get(outputID).getCoordY() : centerList.get(outputID % sensorList.size()).getCoordY();
         return (Math.pow(sensorList.get(sensorID).getCoordX() - xOutput, 2)
                 + Math.pow(sensorList.get(sensorID).getCoordY() - yOutput, 2));
-    }
-
-    /**
-     * Calculates information cost of the configuration.
-     *
-     * @return Information cost.
-     */
-    private Double calculateInformation() {
-        Double totalInformation = 0D;
-        for (int i = sensorList.size(); i < sensorConnections.size(); i++) {
-            List<Integer> inputSensors = sensorConnections.get(i).getInputSensors();
-            totalInformation += recursiveCalculateInformation(inputSensors);
-        }
-        return totalInformation;
-    }
-
-    /**
-     * Recursive calculation of input sensors information.
-     *
-     * @param inputSensors List of input sensors to iterate.
-     * @return Accumulated information value for each input sensor.
-     */
-    private Double recursiveCalculateInformation(List<Integer> inputSensors) {
-        Double information = 0D;
-        for (Integer sensorID : inputSensors) {
-            Double capacity = sensorList.get(sensorID).getCapacidad();
-            List<Integer> nextInputSensors = sensorConnections.get(sensorID).getInputSensors();
-            if (inputSensors.isEmpty()) {
-                information += capacity;
-            } else {
-                information += capacity + Math.min(2 * capacity, recursiveCalculateInformation(nextInputSensors));
-            }
-        }
-        return information;
     }
 
     /**
