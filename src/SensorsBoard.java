@@ -176,6 +176,7 @@ class SensorsBoard {
         for (int i = 0; i < sensorConnections.get(oldEndConnection).getInputsCount(); i++) {
             if (sensorConnections.get(oldEndConnection).getInput(i) == first) {
 
+                /*
                 Double distance = calculateOutputDistance(first);
                 Double information = sensorConnections.get(first).getInformation();
                 Double cost = sensorConnections.get(first).getCost() + (distance * information);
@@ -188,12 +189,13 @@ class SensorsBoard {
                     sensorConnections.get(outputID).addInformation(-information);
                     sensorConnections.get(outputID).addCost(-cost);
                     propagateUpstream(outputID, oldInformation, oldCost);
-                }
+                }*/
 
                 sensorConnections.get(oldEndConnection).removeInput(i);
                 sensorConnections.get(first).setOutputSensor(second);
                 sensorConnections.get(second).addInput(first);
 
+                /*
                 distance = calculateOutputDistance(first);
                 cost = sensorConnections.get(first).getCost() + (distance * information);
 
@@ -208,7 +210,28 @@ class SensorsBoard {
                     propagateUpstream(outputID, oldInformation, oldCost);
                 }
 
-                //recalculateBoardData();
+                try{
+                    PrintWriter writer = new PrintWriter("partial.txt", "UTF-8");
+                    for (SensorNode sensorNode : sensorConnections) {
+                        writer.println(sensorNode.getInformation() + " " + sensorNode.getCost());
+                    }
+                    writer.close();
+                } catch (IOException e) {
+                    // do something
+                }
+
+                recalculateBoardData();
+                try{
+                    PrintWriter writer = new PrintWriter("total.txt", "UTF-8");
+                    for (SensorNode sensorNode : sensorConnections) {
+                        writer.println(sensorNode.getInformation() + " " + sensorNode.getCost());
+                    }
+                    writer.close();
+                } catch (IOException e) {
+                    // do something
+                }*/
+
+                recalculateBoardData();
                 return true;
             }
         }
@@ -285,7 +308,7 @@ class SensorsBoard {
             // Leaf has no cost and its own information
             sensorConnections.get(nodeID).setCost(0D);
             Double information = nodeID < sensorList.size() ? sensorList.get(nodeID).getCapacidad() : 0D;
-            sensorConnections.get(nodeID).setCost(information);
+            sensorConnections.get(nodeID).setInformation(information);
 
             // Return information
             Double distance = nodeID < sensorList.size() ? calculateOutputDistance(nodeID) : 0D;
