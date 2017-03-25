@@ -16,12 +16,13 @@ class SensorsBoard {
 
     private static final Integer NUMBER_SENSORS = 100;
     private static final Integer NUMBER_CENTERS = 4;
-    private static final Integer GENERATOR_SEED = 1234;
+    private static final Integer SEED_SENSORS = 1234;
+    private static final Integer SEED_CENTERS = 4321;
 
     private static final Integer MAX_SENSOR_CONNECTIONS = 3;
     private static final Integer MAX_DATA_CENTER_CONNECTIONS = 25;
 
-    private static final Double INFORMATION_WEIGHT = 2.25;
+    private static final Double INFORMATION_WEIGHT = 2.5;
 
     private static List<Sensor> sensorList;
     private static List<Centro> centerList;
@@ -70,8 +71,8 @@ class SensorsBoard {
      * Generates random board with N sensors and N data centers given a seed.
      */
     private void generateBoard() {
-        sensorList.addAll(new Sensores(NUMBER_SENSORS, GENERATOR_SEED));
-        centerList.addAll(new CentrosDatos(NUMBER_CENTERS, GENERATOR_SEED));
+        sensorList.addAll(new Sensores(NUMBER_SENSORS, SEED_SENSORS));
+        centerList.addAll(new CentrosDatos(NUMBER_CENTERS, SEED_CENTERS));
     }
 
     /*---- INITIAL STATES ----*/
@@ -268,28 +269,46 @@ class SensorsBoard {
      */
     private Pair<Double, Double> calculateData(Integer nodeID, List<Integer> inputs) {
         if (inputs.isEmpty()) {
-            // Leaf has no cost.
+            // Leaf has no cost and its own information
             sensorConnections.get(nodeID).setCost(0D);
-            // Leaf information is its own information.
             Double information = nodeID < sensorList.size() ? sensorList.get(nodeID).getCapacidad() : 0D;
             sensorConnections.get(nodeID).setCost(information);
 
+            // Return information
             Double distance = nodeID < sensorList.size() ? calculateOutputDistance(nodeID) : 0D;
-            return new Pair<>(information, information * distance);
+            return new Pair<>(information, distance * information);
         }
 
-        SensorNode currentNode = sensorConnections.get(nodeID);
+        // Reset node information
+        Double information = nodeID < sensorList.size() ? sensorList.get(nodeID).getCapacidad() : 0D;
+        sensorConnections.get(nodeID).setInformation(information);
+        sensorConnections.get(nodeID).setCost(0D);
+
+        // Refresh children data
         for (Integer input : inputs) {
-            Pair<Double, Double> aux = calculateData(input, sensorConnections.get(input).getInputs());
-
-            sensorConnections.get(nodeID).setInformation(currentNode.getInformation() + aux.getInformation());
-            sensorConnections.get(nodeID).setCost(currentNode.getCost() + aux.getCost());
+            Pair<Double, Double> childData = calculateData(input, sensorConnections.get(input).getInputs());
+            sensorConnections.get(nodeID).addInformation(childData.getInformation());
+            sensorConnections.get(nodeID).addCost(childData.getCost());
         }
 
-        Double distance = nodeID < sensorList.size() ? calculateOutputDistance(nodeID) : 0D;
-        return new Pair<>(currentNode.getInformation(), currentNode.getCost() + (currentNode.getInformation() * distance));
+        // Return modified data
+        SensorNode currentNode = sensorConnections.get(nodeID);
+        Double cost = nodeID < sensorList.size() ? calculateOutputDistance(nodeID) : 0D;
+        if (nodeID < sensorList.size()) {
+            information = Math.min(2 * sensorList.get(nodeID).getCapacidad(), currentNode.getInformation());
+            cost = (cost * information) + currentNode.getCost();
+            return new Pair<>(information, cost);
+        } else {
+            return new Pair<>(currentNode.getInformation(), currentNode.getCost());
+        }
     }
 
+    /**
+     * Calculate distance from a sensor to a output node.
+     *
+     * @param sensorID Sensor unique identifier.
+     * @return Output cost.
+     */
     private Double calculateOutputDistance(Integer sensorID) {
         Integer outputID = sensorConnections.get(sensorID).getOutputSensor();
         Integer xOutput = outputID < sensorList.size() ? sensorList.get(outputID).getCoordX() : centerList.get(outputID % sensorList.size()).getCoordX();

@@ -9,6 +9,7 @@ import java.util.Properties;
 public class Main {
 
     public static void main(String[] args) throws Exception {
+        Long time = System.currentTimeMillis();
         SensorsBoard board = new SensorsBoard();
 
         // Create the Problem object
@@ -25,10 +26,14 @@ public class Main {
         printActions(agent.getActions());
         printInstrumentation(agent.getInstrumentation());
 
+        // Get total time
+        time = System.currentTimeMillis() - time;
+
         // We print cost and information
         System.out.println();
         System.out.println("Total cost -> " + SensorsBoard.COST);
         System.out.println("Total information -> " + SensorsBoard.INFORMATION);
+        System.out.println("Total time -> " + time + "ms");
     }
 
     private static void printInstrumentation(Properties properties) {
