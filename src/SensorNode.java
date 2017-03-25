@@ -13,11 +13,11 @@ class SensorNode {
      * @param outputSensor Outgoing sensorID.
      * @param inputSensors Incoming list of sensorIDs.
      */
-    SensorNode(Integer outputSensor, List<Integer> inputSensors) {
-        cost = 0D;
-        information = 0D;
+    SensorNode(Integer outputSensor, List<Integer> inputSensors, Double cost, Double information) {
         this.outputSensor = outputSensor;
         this.inputSensors = inputSensors;
+        this.cost = cost;
+        this.information = information;
     }
 
     Double getCost() {

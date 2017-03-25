@@ -53,14 +53,14 @@ class SensorsBoard {
      * @param board Parent state board.
      */
     SensorsBoard(SensorsBoard board) {
-
         sensorConnections = new ArrayList<>();
         for (int i = 0; i < getProblemSize(); i++) {
             List<Integer> inputs = new ArrayList<>();
             for (int j = 0; j < board.sensorConnections.get(i).getInputsCount(); j++) {
                 inputs.add(board.sensorConnections.get(i).getInput(j));
             }
-            sensorConnections.add(new SensorNode(board.sensorConnections.get(i).getOutputSensor(), inputs));
+            sensorConnections.add(new SensorNode(board.sensorConnections.get(i).getOutputSensor(), inputs,
+                    board.sensorConnections.get(i).getCost(), board.sensorConnections.get(i).getInformation()));
         }
 
         totalCost = board.getTotalCost();
@@ -87,18 +87,18 @@ class SensorsBoard {
             if (i > 0) {
                 inputs.add(i - 1);
             }
-            sensorConnections.add(new SensorNode(i + 1, inputs));
+            sensorConnections.add(new SensorNode(i + 1, inputs, 0D, 0D));
         }
         List<Integer> inputs = new ArrayList<>();
         inputs.add(sensorList.size() - 2);
-        sensorConnections.add(new SensorNode(sensorList.size(), inputs));
+        sensorConnections.add(new SensorNode(sensorList.size(), inputs, 0D, 0D));
 
         for (int i = 0; i < centerList.size(); i++) {
             inputs = new ArrayList<>();
             if (i == 0) {
                 inputs.add(sensorList.size() - 1);
             }
-            sensorConnections.add(new SensorNode(null, inputs));
+            sensorConnections.add(new SensorNode(null, inputs, 0D, 0D));
         }
     }
 
@@ -111,7 +111,7 @@ class SensorsBoard {
 
         for (int i = 0; i < getProblemSize(); i++) {
             List<Integer> inputs = new ArrayList<>();
-            sensorConnections.add(new SensorNode(null, inputs));
+            sensorConnections.add(new SensorNode(null, inputs, 0D, 0D));
         }
 
         Integer currentCenter = sensorList.size();
@@ -141,6 +141,9 @@ class SensorsBoard {
         recalculateBoardData();
     }
 
+    /**
+     * Recalculates board data reseting all nodes.
+     */
     private void recalculateBoardData() {
         Integer currentCenter;
         totalCost = 0D;
@@ -173,50 +176,60 @@ class SensorsBoard {
         for (int i = 0; i < sensorConnections.get(oldEndConnection).getInputsCount(); i++) {
             if (sensorConnections.get(oldEndConnection).getInput(i) == first) {
 
-                // Subtract old upstream connections cost and information.
-/*                Double oldCost = sensorConnections.get(first).getCost();
-                Double oldInformation = sensorConnections.get(first).getInformation();
-                Double oldDistance = calculateOutputDistance(first);
+                Double distance = calculateOutputDistance(first);
+                Double information = sensorConnections.get(first).getInformation();
+                Double cost = sensorConnections.get(first).getCost() + (distance * information);
 
-                Integer parent = sensorConnections.get(first).getOutputSensor();
-                while (parent != null) {
-                    sensorConnections.get(parent).addCost(-oldCost);
-                    sensorConnections.get(parent).addInformation(-oldInformation);
-                    //TODO: Sensor supera limit info -> no restar tot
-                    //TODO: Al totalitzar, guardar total i pujar min(maxVal, total)
+                Integer outputID = sensorConnections.get(first).getOutputSensor(); // parent to disconnect
+                if (outputID != null) {
+                    Double oldInformation = sensorConnections.get(outputID).getInformation();
+                    Double oldCost = sensorConnections.get(outputID).getCost();
 
-                    parent = sensorConnections.get(parent).getOutputSensor();
-                }*/
+                    sensorConnections.get(outputID).addInformation(-information);
+                    sensorConnections.get(outputID).addCost(-cost);
+                    propagateUpstream(outputID, oldInformation, oldCost);
+                }
 
                 sensorConnections.get(oldEndConnection).removeInput(i);
                 sensorConnections.get(first).setOutputSensor(second);
                 sensorConnections.get(second).addInput(first);
 
- /*               // Add new upstream connections cost and information.
-                Double information = sensorConnections.get(first).getInformation();
-                Double distanceDifference = calculateOutputDistance(first) - oldDistance;
-                sensorConnections.get(first).addCost(distanceDifference);
+                distance = calculateOutputDistance(first);
+                cost = sensorConnections.get(first).getCost() + (distance * information);
 
-                parent = sensorConnections.get(first).getOutputSensor();
-                while (parent != null) {
-                    sensorConnections.get(parent).addCost(distanceDifference);
+                outputID = sensorConnections.get(first).getOutputSensor();
+                if (outputID != null) {
+                    Double oldInformation = sensorConnections.get(outputID).getInformation();
+                    Double oldCost = sensorConnections.get(outputID).getCost();
 
-                    Double infoAux = parent < sensorList.size()
-                            ? Math.min(2 * sensorList.get(parent).getCapacidad(), information + sensorConnections.get(parent).getInformation())
-                            : information + sensorConnections.get(parent).getInformation();
-                    sensorConnections.get(parent).addInformation(infoAux);
-                    sensorConnections.get(parent).addCost(sensorConnections.get(first).getCost());
-                    //TODO: No tira
-
-                    parent = sensorConnections.get(parent).getOutputSensor();
+                    sensorConnections.get(outputID).addInformation(outputID < sensorList.size()
+                            ? Math.min(3 * sensorList.get(outputID).getCapacidad(), information) : information);
+                    sensorConnections.get(outputID).addCost(cost);
+                    propagateUpstream(outputID, oldInformation, oldCost);
                 }
-*/
 
-                recalculateBoardData();
+                //recalculateBoardData();
                 return true;
             }
         }
         return false;
+    }
+
+    private void propagateUpstream(Integer outputID, Double oldInformation, Double oldCost) {
+
+        Double oldInformationTransmitted = outputID < sensorList.size()
+                ? Math.min(3 * sensorList.get(outputID).getCapacidad(), oldInformation) : oldInformation;
+        Double newInformationTransmitted = outputID < sensorList.size()
+                ? Math.min(3 * sensorList.get(outputID).getCapacidad(), sensorConnections.get(outputID).getInformation())
+                : sensorConnections.get(outputID).getInformation();
+
+        outputID = sensorConnections.get(outputID).getOutputSensor();
+        if (outputID != null) {
+            oldInformation = sensorConnections.get(outputID).getInformation();
+            sensorConnections.get(outputID).addCost(-(newInformationTransmitted - oldInformationTransmitted));
+            sensorConnections.get(outputID).addCost(-oldCost);
+            propagateUpstream(outputID, oldInformation, oldCost);
+        }
     }
 
     /*-------------- HEURISTICS --------------*/
@@ -295,7 +308,7 @@ class SensorsBoard {
         SensorNode currentNode = sensorConnections.get(nodeID);
         Double cost = nodeID < sensorList.size() ? calculateOutputDistance(nodeID) : 0D;
         if (nodeID < sensorList.size()) {
-            information = Math.min(2 * sensorList.get(nodeID).getCapacidad(), currentNode.getInformation());
+            information = Math.min(3 * sensorList.get(nodeID).getCapacidad(), currentNode.getInformation());
             cost = (cost * information) + currentNode.getCost();
             return new Pair<>(information, cost);
         } else {
