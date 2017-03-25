@@ -12,8 +12,6 @@ public class SensorsSuccessors implements SuccessorFunction {
         SensorsBoard.COST = board.costHeuristic();
         SensorsBoard.INFORMATION = board.informationHeuristic();
 
-        System.out.println(SensorsBoard.COST + " - " + SensorsBoard.INFORMATION + " -> " + board.superHeuristic());
-
         for (int i = 0; i < board.getSensorsSize(); i++) {
             for (int j = 0; j < board.getProblemSize(); j++) {
                 if (i != j) {

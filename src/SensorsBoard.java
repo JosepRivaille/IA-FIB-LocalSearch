@@ -11,9 +11,6 @@ import java.util.List;
  */
 class SensorsBoard {
 
-    private Double totalInformation;
-    private Double totalCost;
-
     private static final Integer NUMBER_SENSORS = 100;
     private static final Integer NUMBER_CENTERS = 4;
     private static final Integer SEED_SENSORS = 4321;
@@ -27,10 +24,13 @@ class SensorsBoard {
     private static List<Sensor> sensorList;
     private static List<Centro> centerList;
 
-    private List<SensorNode> sensorConnections;
-
     static Double COST;
     static Double INFORMATION;
+
+    private Double totalInformation;
+    private Double totalCost;
+
+    private List<SensorNode> sensorConnections;
 
     /**
      * Default constructor
@@ -146,16 +146,12 @@ class SensorsBoard {
      */
     private void recalculateBoardData() {
         Integer currentCenter;
-        totalCost = 0D;
-        totalInformation = 0D;
         for (currentCenter = sensorList.size(); currentCenter < getProblemSize(); currentCenter++) {
             Pair<Double, Double> data = calculateData(currentCenter, sensorConnections.get(currentCenter).getInputs());
             sensorConnections.get(currentCenter).setInformation(data.getInformation());
             sensorConnections.get(currentCenter).setCost(data.getCost());
-
-            totalInformation += data.getInformation();
-            totalCost += data.getCost();
         }
+        recalculateTotalValues();
     }
 
     /*---- OPERATORS ----*/
@@ -182,34 +178,12 @@ class SensorsBoard {
 
                 recalculateDataUpstreamFromNode(oldEndConnection);
                 recalculateDataUpstreamFromNode(second);
-
-                Integer currentCenter;
-                totalInformation = 0D;
-                totalCost = 0D;
-                for (currentCenter = sensorList.size(); currentCenter < getProblemSize(); currentCenter++) {
-                    totalInformation += sensorConnections.get(currentCenter).getInformation();
-                    totalCost += sensorConnections.get(currentCenter).getCost();
-                }
+                recalculateTotalValues();
 
                 return true;
             }
         }
         return false;
-    }
-
-    private void recalculateDataUpstreamFromNode(Integer nodeID) {
-        SensorNode currentNode = sensorConnections.get(nodeID);
-        currentNode.setInformation(nodeID < sensorList.size() ? sensorList.get(nodeID).getCapacidad() : 0D);
-        currentNode.setCost(0D);
-        for (Integer inputID : currentNode.getInputSensors()) {
-            Double informationTransmitted = Math.min(3 * sensorList.get(inputID).getCapacidad(), sensorConnections.get(inputID).getInformation());
-            currentNode.addInformation(informationTransmitted);
-            currentNode.addCost(sensorConnections.get(inputID).getCost() + (informationTransmitted * calculateOutputDistance(inputID)));
-        }
-        Integer nextNode = sensorConnections.get(nodeID).getOutputSensor();
-        if (nextNode != null) {
-            recalculateDataUpstreamFromNode(nextNode);
-        }
     }
 
     /*-------------- HEURISTICS --------------*/
@@ -296,6 +270,36 @@ class SensorsBoard {
     }
 
     /**
+     * Upstream calculation of information and cost from an specific node.
+     *
+     * @param nodeID Node from where to start.
+     */
+    private void recalculateDataUpstreamFromNode(Integer nodeID) {
+        SensorNode currentNode = sensorConnections.get(nodeID);
+        currentNode.setInformation(nodeID < sensorList.size() ? sensorList.get(nodeID).getCapacidad() : 0D);
+        currentNode.setCost(0D);
+        for (Integer inputID : currentNode.getInputSensors()) {
+            Double informationTransmitted = Math.min(3 * sensorList.get(inputID).getCapacidad(), sensorConnections.get(inputID).getInformation());
+            currentNode.addInformation(informationTransmitted);
+            currentNode.addCost(sensorConnections.get(inputID).getCost() + (informationTransmitted * calculateOutputDistance(inputID)));
+        }
+        Integer nextNode = sensorConnections.get(nodeID).getOutputSensor();
+        if (nextNode != null) {
+            recalculateDataUpstreamFromNode(nextNode);
+        }
+    }
+
+    private void recalculateTotalValues() {
+        Integer currentCenter;
+        totalInformation = 0D;
+        totalCost = 0D;
+        for (currentCenter = sensorList.size(); currentCenter < getProblemSize(); currentCenter++) {
+            totalInformation += sensorConnections.get(currentCenter).getInformation();
+            totalCost += sensorConnections.get(currentCenter).getCost();
+        }
+    }
+
+    /**
      * Calculate distance from a sensor to a output node.
      *
      * @param sensorID Sensor unique identifier.
@@ -374,6 +378,12 @@ class SensorsBoard {
         return totalInformation;
     }
 
+    /**
+     * Auxiliary class to represent data transmission among nodes.
+     *
+     * @param <I> Information unit.
+     * @param <C> Cost unit.
+     */
     private class Pair<I, C> {
 
         private I information;
