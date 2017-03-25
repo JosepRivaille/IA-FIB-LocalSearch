@@ -22,7 +22,7 @@ class SensorsBoard {
     private static final Integer MAX_SENSOR_CONNECTIONS = 3;
     private static final Integer MAX_DATA_CENTER_CONNECTIONS = 25;
 
-    private static final Double INFORMATION_WEIGHT = 2.25;
+    private static final Double INFORMATION_WEIGHT = 2.5;
 
     private static List<Sensor> sensorList;
     private static List<Centro> centerList;
@@ -176,82 +176,39 @@ class SensorsBoard {
         for (int i = 0; i < sensorConnections.get(oldEndConnection).getInputsCount(); i++) {
             if (sensorConnections.get(oldEndConnection).getInput(i) == first) {
 
-                /*
-                Double distance = calculateOutputDistance(first);
-                Double information = sensorConnections.get(first).getInformation();
-                Double cost = sensorConnections.get(first).getCost() + (distance * information);
-
-                Integer outputID = sensorConnections.get(first).getOutputSensor(); // parent to disconnect
-                if (outputID != null) {
-                    Double oldInformation = sensorConnections.get(outputID).getInformation();
-                    Double oldCost = sensorConnections.get(outputID).getCost();
-
-                    sensorConnections.get(outputID).addInformation(-information);
-                    sensorConnections.get(outputID).addCost(-cost);
-                    propagateUpstream(outputID, oldInformation, oldCost);
-                }*/
-
                 sensorConnections.get(oldEndConnection).removeInput(i);
                 sensorConnections.get(first).setOutputSensor(second);
                 sensorConnections.get(second).addInput(first);
 
-                /*
-                distance = calculateOutputDistance(first);
-                cost = sensorConnections.get(first).getCost() + (distance * information);
+                recalculateDataUpstreamFromNode(oldEndConnection);
+                recalculateDataUpstreamFromNode(second);
 
-                outputID = sensorConnections.get(first).getOutputSensor();
-                if (outputID != null) {
-                    Double oldInformation = sensorConnections.get(outputID).getInformation();
-                    Double oldCost = sensorConnections.get(outputID).getCost();
-
-                    sensorConnections.get(outputID).addInformation(outputID < sensorList.size()
-                            ? Math.min(3 * sensorList.get(outputID).getCapacidad(), information) : information);
-                    sensorConnections.get(outputID).addCost(cost);
-                    propagateUpstream(outputID, oldInformation, oldCost);
+                Integer currentCenter;
+                totalInformation = 0D;
+                totalCost = 0D;
+                for (currentCenter = sensorList.size(); currentCenter < getProblemSize(); currentCenter++) {
+                    totalInformation += sensorConnections.get(currentCenter).getInformation();
+                    totalCost += sensorConnections.get(currentCenter).getCost();
                 }
 
-                try{
-                    PrintWriter writer = new PrintWriter("partial.txt", "UTF-8");
-                    for (SensorNode sensorNode : sensorConnections) {
-                        writer.println(sensorNode.getInformation() + " " + sensorNode.getCost());
-                    }
-                    writer.close();
-                } catch (IOException e) {
-                    // do something
-                }
-
-                recalculateBoardData();
-                try{
-                    PrintWriter writer = new PrintWriter("total.txt", "UTF-8");
-                    for (SensorNode sensorNode : sensorConnections) {
-                        writer.println(sensorNode.getInformation() + " " + sensorNode.getCost());
-                    }
-                    writer.close();
-                } catch (IOException e) {
-                    // do something
-                }*/
-
-                recalculateBoardData();
                 return true;
             }
         }
         return false;
     }
 
-    private void propagateUpstream(Integer outputID, Double oldInformation, Double oldCost) {
-
-        Double oldInformationTransmitted = outputID < sensorList.size()
-                ? Math.min(3 * sensorList.get(outputID).getCapacidad(), oldInformation) : oldInformation;
-        Double newInformationTransmitted = outputID < sensorList.size()
-                ? Math.min(3 * sensorList.get(outputID).getCapacidad(), sensorConnections.get(outputID).getInformation())
-                : sensorConnections.get(outputID).getInformation();
-
-        outputID = sensorConnections.get(outputID).getOutputSensor();
-        if (outputID != null) {
-            oldInformation = sensorConnections.get(outputID).getInformation();
-            sensorConnections.get(outputID).addCost(-(newInformationTransmitted - oldInformationTransmitted));
-            sensorConnections.get(outputID).addCost(-oldCost);
-            propagateUpstream(outputID, oldInformation, oldCost);
+    private void recalculateDataUpstreamFromNode(Integer nodeID) {
+        SensorNode currentNode = sensorConnections.get(nodeID);
+        currentNode.setInformation(nodeID < sensorList.size() ? sensorList.get(nodeID).getCapacidad() : 0D);
+        currentNode.setCost(0D);
+        for (Integer inputID : currentNode.getInputSensors()) {
+            Double informationTransmitted = Math.min(3 * sensorList.get(inputID).getCapacidad(), sensorConnections.get(inputID).getInformation());
+            currentNode.addInformation(informationTransmitted);
+            currentNode.addCost(sensorConnections.get(inputID).getCost() + (informationTransmitted * calculateOutputDistance(inputID)));
+        }
+        Integer nextNode = sensorConnections.get(nodeID).getOutputSensor();
+        if (nextNode != null) {
+            recalculateDataUpstreamFromNode(nextNode);
         }
     }
 
