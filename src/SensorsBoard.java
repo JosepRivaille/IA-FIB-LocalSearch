@@ -16,13 +16,13 @@ class SensorsBoard {
 
     private static final Integer NUMBER_SENSORS = 100;
     private static final Integer NUMBER_CENTERS = 4;
-    private static final Integer SEED_SENSORS = 1234;
-    private static final Integer SEED_CENTERS = 4321;
+    private static final Integer SEED_SENSORS = 4321;
+    private static final Integer SEED_CENTERS = 1234;
 
     private static final Integer MAX_SENSOR_CONNECTIONS = 3;
     private static final Integer MAX_DATA_CENTER_CONNECTIONS = 25;
 
-    private static final Double INFORMATION_WEIGHT = 2.5;
+    private static final Double INFORMATION_WEIGHT = 2.25;
 
     private static List<Sensor> sensorList;
     private static List<Centro> centerList;
@@ -292,7 +292,6 @@ class SensorsBoard {
      * @return Is a goal state.
      */
     boolean isGoal() {
-        //TODO: ?
         return false;
     }
 
@@ -347,8 +346,12 @@ class SensorsBoard {
      */
     private Double calculateOutputDistance(Integer sensorID) {
         Integer outputID = sensorConnections.get(sensorID).getOutputSensor();
-        Integer xOutput = outputID < sensorList.size() ? sensorList.get(outputID).getCoordX() : centerList.get(outputID % sensorList.size()).getCoordX();
-        Integer yOutput = outputID < sensorList.size() ? sensorList.get(outputID).getCoordY() : centerList.get(outputID % sensorList.size()).getCoordY();
+        Integer xOutput = outputID < sensorList.size()
+                ? sensorList.get(outputID).getCoordX()
+                : centerList.get(outputID % sensorList.size()).getCoordX();
+        Integer yOutput = outputID < sensorList.size()
+                ? sensorList.get(outputID).getCoordY()
+                : centerList.get(outputID % sensorList.size()).getCoordY();
         return (Math.pow(sensorList.get(sensorID).getCoordX() - xOutput, 2)
                 + Math.pow(sensorList.get(sensorID).getCoordY() - yOutput, 2));
     }
