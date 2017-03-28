@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 class SensorNode {
@@ -18,6 +19,21 @@ class SensorNode {
         this.inputSensors = inputSensors;
         this.cost = cost;
         this.information = information;
+    }
+
+    SensorNode(SensorNode sensorNode) {
+        outputSensor = sensorNode.getOutputSensor();
+        inputSensors = new ArrayList<>();
+        for (Integer inputSensor : sensorNode.getInputSensors()) {
+            inputSensors.add(inputSensor);
+        }
+        cost = sensorNode.getCost();
+        information = sensorNode.getInformation();
+    }
+
+    @Override
+    protected SensorNode clone() throws CloneNotSupportedException {
+        return (SensorNode) super.clone();
     }
 
     Double getCost() {

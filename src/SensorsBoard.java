@@ -54,17 +54,12 @@ class SensorsBoard {
      */
     SensorsBoard(SensorsBoard board) {
         sensorConnections = new ArrayList<>();
-        for (int i = 0; i < getProblemSize(); i++) {
-            List<Integer> inputs = new ArrayList<>();
-            for (int j = 0; j < board.sensorConnections.get(i).getInputsCount(); j++) {
-                inputs.add(board.sensorConnections.get(i).getInput(j));
-            }
-            sensorConnections.add(new SensorNode(board.sensorConnections.get(i).getOutputSensor(), inputs,
-                    board.sensorConnections.get(i).getCost(), board.sensorConnections.get(i).getInformation()));
+        for (SensorNode sensorNode : board.sensorConnections) {
+            sensorConnections.add(new SensorNode(sensorNode));
         }
 
-        totalCost = board.getTotalCost();
-        totalInformation = board.getTotalInformation();
+        totalCost = board.totalCost;
+        totalInformation = board.totalInformation;
     }
 
     /**
@@ -142,7 +137,7 @@ class SensorsBoard {
     }
 
     /**
-     * Recalculates board data reseting all nodes.
+     * Recalculates board data resetting all nodes.
      */
     private void recalculateBoardData() {
         Integer currentCenter;
@@ -161,11 +156,11 @@ class SensorsBoard {
      *
      * @param first  Sensor from that we will swap its output connection.
      * @param second Sensor that will receive the new input connection.
-     * @return If connection has been swapped.
+     * @return If connection has been switched.
      */
-    Boolean swapConnection(int first, int second) {
+    Boolean switchConnection(int first, int second) {
         Integer oldEndConnection = sensorConnections.get(first).getOutputSensor();
-        if (second == oldEndConnection || !isAllowedConnection(first, second)) {
+        if (second == oldEndConnection || !isAllowedConnection(first, second, 0)) {
             return false;
         }
 
@@ -183,6 +178,52 @@ class SensorsBoard {
                 return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * Switch output connections between two sensors.
+     *
+     * @param first  First sensor to connect the second one output.
+     * @param second Second sensor to connect the first one output.
+     * @return If connection has benn swapped.
+     */
+    Boolean swapConnection(int first, int second) {
+        Integer oldEndFirstConnection = sensorConnections.get(first).getOutputSensor();
+        Integer oldEndSecondConnection = sensorConnections.get(second).getOutputSensor();
+        if (first == oldEndSecondConnection || second == oldEndFirstConnection ||
+                !isAllowedConnection(first, oldEndSecondConnection, 1) ||
+                !isAllowedConnection(second, oldEndFirstConnection, 1)) {
+            return false;
+        }
+
+        int secondIndex = 0;
+        for (Integer secondInputID : sensorConnections.get(oldEndSecondConnection).getInputSensors()) {
+            if (secondInputID == second) {
+                int firstIndex = 0;
+                for (Integer firstInputID : sensorConnections.get(oldEndFirstConnection).getInputSensors()) {
+                    if (firstInputID == first) {
+                        sensorConnections.get(first).setOutputSensor(oldEndSecondConnection);
+                        sensorConnections.get(second).setOutputSensor(oldEndFirstConnection);
+
+                        sensorConnections.get(oldEndSecondConnection).removeInput(secondIndex);
+                        sensorConnections.get(oldEndSecondConnection).addInput(first);
+
+                        sensorConnections.get(oldEndFirstConnection).removeInput(firstIndex);
+                        sensorConnections.get(oldEndFirstConnection).addInput(second);
+
+                        recalculateDataUpstreamFromNode(oldEndFirstConnection);
+                        recalculateDataUpstreamFromNode(oldEndSecondConnection);
+                        recalculateTotalValues();
+
+                        return true;
+                    }
+                    firstIndex++;
+                }
+            }
+            secondIndex++;
+        }
+
         return false;
     }
 
@@ -324,9 +365,9 @@ class SensorsBoard {
      * @param second Sensor that will receive the input connection.
      * @return If the connection can be performed.
      */
-    private Boolean isAllowedConnection(int first, int second) {
+    private Boolean isAllowedConnection(int first, int second, int margin) {
         Integer maxConnections = second < sensorList.size() ? MAX_SENSOR_CONNECTIONS : MAX_DATA_CENTER_CONNECTIONS;
-        if (sensorConnections.get(second).getInputsCount() >= maxConnections) {
+        if (sensorConnections.get(second).getInputsCount() >= maxConnections + margin) {
             return false;
         }
 
@@ -358,24 +399,6 @@ class SensorsBoard {
      */
     Integer getProblemSize() {
         return sensorList.size() + centerList.size();
-    }
-
-    /**
-     * Gets problem distance cost.
-     *
-     * @return Cost of the current configuration.
-     */
-    private Double getTotalCost() {
-        return totalCost;
-    }
-
-    /**
-     * Gets problem information cost.
-     *
-     * @return Information value of the current configuration.
-     */
-    private Double getTotalInformation() {
-        return totalInformation;
     }
 
     /**
