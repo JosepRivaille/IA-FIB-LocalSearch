@@ -13,18 +13,22 @@ public class Main {
         Long time = System.currentTimeMillis();
         SensorsBoard board = new SensorsBoard();
 
-        // Create the Problem object
-        Problem p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
-
-        // Instantiate the search algorithm
-        // AStarSearch(new GraphSearch()) or IterativeDeepeningAStarSearch()
-        Search alg = new HillClimbingSearch();
+        // Create the Problem object and instantiate the search algorithm
+        Problem p;
+        Search alg;
+        if (args[0].equals("HC")) {
+            p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
+            alg = new HillClimbingSearch();
+        } else {
+            p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
+            alg = new SimulatedAnnealingSearch(20000, 100, 10, 0.001);
+        }
 
         // Instantiate the SearchAgent object
         SearchAgent agent = new SearchAgent(p, alg);
 
         // We print the results of the search
-        printActions(agent.getActions());
+        //printActions(agent.getActions());
         printInstrumentation(agent.getInstrumentation());
 
         // Get total time

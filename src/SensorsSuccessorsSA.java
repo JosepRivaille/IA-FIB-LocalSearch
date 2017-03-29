@@ -18,7 +18,7 @@ public class SensorsSuccessorsSA implements SuccessorFunction {
         int j = random.nextInt(board.getProblemSize());
 
         SensorsBoard successorBoard = new SensorsBoard(board);
-        if (successorBoard.switchConnection(i, j)) {
+        if (i != j && successorBoard.switchConnection(i, j)) {
             childrenStates.add(new Successor("switch connection " + i + " - " + j, successorBoard));
         }
 
