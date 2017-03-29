@@ -2,6 +2,7 @@ import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
 import aima.search.informed.HillClimbingSearch;
+import aima.search.informed.SimulatedAnnealingSearch;
 
 import java.util.List;
 import java.util.Properties;
@@ -13,7 +14,7 @@ public class Main {
         SensorsBoard board = new SensorsBoard();
 
         // Create the Problem object
-        Problem p = new Problem(board, new SensorsSuccessors(), new SensorsGoal(), new SensorsHeuristic());
+        Problem p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
 
         // Instantiate the search algorithm
         // AStarSearch(new GraphSearch()) or IterativeDeepeningAStarSearch()

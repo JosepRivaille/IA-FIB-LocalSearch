@@ -186,12 +186,13 @@ class SensorsBoard {
      *
      * @param first  First sensor to connect the second one output.
      * @param second Second sensor to connect the first one output.
-     * @return If connection has benn swapped.
+     * @return If connection has been swapped.
      */
     Boolean swapConnection(int first, int second) {
-        Integer oldEndFirstConnection = sensorConnections.get(first).getOutputSensor();
-        Integer oldEndSecondConnection = sensorConnections.get(second).getOutputSensor();
+        int oldEndFirstConnection = sensorConnections.get(first).getOutputSensor();
+        int oldEndSecondConnection = sensorConnections.get(second).getOutputSensor();
         if (first == oldEndSecondConnection || second == oldEndFirstConnection ||
+                oldEndFirstConnection == oldEndSecondConnection ||
                 !isAllowedConnection(first, oldEndSecondConnection, 1) ||
                 !isAllowedConnection(second, oldEndFirstConnection, 1)) {
             return false;

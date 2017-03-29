@@ -4,7 +4,7 @@ import aima.search.framework.SuccessorFunction;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SensorsSuccessors implements SuccessorFunction {
+public class SensorsSuccessorsHC implements SuccessorFunction {
 
     public List getSuccessors(Object state) {
         ArrayList<Successor> childrenStates = new ArrayList<>();
