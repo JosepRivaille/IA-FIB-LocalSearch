@@ -14,21 +14,27 @@ public class Main {
         SensorsBoard board = new SensorsBoard();
 
         // Create the Problem object and instantiate the search algorithm
-        Problem p;
-        Search alg;
-        if (args[0].equals("HC")) {
-            p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
-            alg = new HillClimbingSearch();
-        } else {
-            p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
-            alg = new SimulatedAnnealingSearch(20000, 100, 10, 0.001);
+        Problem p = null;
+        Search alg = null;
+        switch (args[0]) {
+            case "HC":
+                p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
+                alg = new HillClimbingSearch();
+                break;
+            case "SA":
+                p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
+                alg = new SimulatedAnnealingSearch(20000, 100, 50, 0.001);
+                break;
+            default:
+                System.out.println("Use args HC or SA to use HillClimbingSearch or SimulatedAnnealingSearch respectively");
+                System.exit(1);
         }
 
         // Instantiate the SearchAgent object
         SearchAgent agent = new SearchAgent(p, alg);
 
         // We print the results of the search
-        //printActions(agent.getActions());
+        printActions(agent.getActions());
         printInstrumentation(agent.getInstrumentation());
 
         // Get total time
@@ -52,7 +58,7 @@ public class Main {
 
     private static void printActions(List actions) {
         for (Object action1 : actions) {
-            String action = (String) action1;
+            String action = action1.toString();
             System.out.println(action);
         }
     }

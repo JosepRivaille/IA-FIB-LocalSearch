@@ -19,16 +19,14 @@ public class SensorsSuccessorsHC implements SuccessorFunction {
                     if (successorBoard.switchConnection(i, j)) {
                         childrenStates.add(new Successor("switch connection " + i + " - " + j, successorBoard));
                     }
-                }
-            }
-            /*for (int j = 0; j < board.getSensorsSize(); j++) {
-                if (i != j) {
-                    SensorsBoard successorBoard = new SensorsBoard(board);
-                    if (successorBoard.swapConnection(i, j)) {
-                        childrenStates.add(new Successor("swap connection " + i + " - " + j, successorBoard));
+                    if (j < board.getSensorsSize()) {
+                        successorBoard = new SensorsBoard(board);
+                        if (successorBoard.swapConnection(i, j)) {
+                            childrenStates.add(new Successor("swap connection " + i + " - " + j, successorBoard));
+                        }
                     }
                 }
-            }*/
+            }
         }
 
         return childrenStates;
