@@ -42,9 +42,9 @@ class SensorsBoard {
         generateBoard();
         sensorConnections = new ArrayList<>(sensorList.size());
 
-        //generateEmptyInitialState();
-        //generateDummyInitialState();
-        generateGreedyInitialState();
+        //generateSequentialInitialState();
+        //generateSimpleGreedyInitialState();
+        generateDistanceGreedyInitialState();
     }
 
     /**
@@ -76,7 +76,7 @@ class SensorsBoard {
      * Initial state generation with random sequential connections.
      */
     @SuppressWarnings("unused")
-    private void generateDummyInitialState() {
+    private void generateSequentialInitialState() {
         for (int i = 0; i < sensorList.size() - 1; i++) {
             List<Integer> inputs = new ArrayList<>();
             if (i > 0) {
@@ -95,13 +95,16 @@ class SensorsBoard {
             }
             sensorConnections.add(new SensorNode(null, inputs, 0D, 0D));
         }
+
+        recalculateBoardData();
+        System.out.print("Initial state cost and information -> " + totalCost + " " + totalInformation);
     }
 
     /**
      * Initial state generation with greedy capacity sorting strategy.
      */
-    private void generateGreedyInitialState() {
-
+    @SuppressWarnings("unused")
+    private void generateSimpleGreedyInitialState() {
         sensorList.sort((sensor1, sensor2) -> ((Double) (sensor2.getCapacidad() - sensor1.getCapacidad())).intValue());
 
         for (int i = 0; i < getProblemSize(); i++) {
@@ -134,6 +137,85 @@ class SensorsBoard {
         }
 
         recalculateBoardData();
+        System.out.print("Initial state cost and information -> " + totalCost + " " + totalInformation);
+    }
+
+    /**
+     * Initial state generation with distance priority greedy capacity sorting strategy.
+     */
+    @SuppressWarnings("unused")
+    private void generateDistanceGreedyInitialState() {
+        sensorList.sort((sensor1, sensor2) -> ((Double) (sensor2.getCapacidad() - sensor1.getCapacidad())).intValue());
+
+        for (int i = 0; i < getProblemSize(); i++) {
+            List<Integer> inputs = new ArrayList<>();
+            sensorConnections.add(new SensorNode(null, inputs, 0D, 0D));
+        }
+
+        List<Integer> availableNodes = new ArrayList<>();
+        for (Integer currentCenter = sensorList.size(); currentCenter < getProblemSize(); currentCenter++) {
+            availableNodes.add(currentCenter);
+        }
+
+        Integer sensorID = 0;
+        while (!availableNodes.isEmpty() && sensorID < sensorList.size()) {
+            Integer bestNode = availableNodes.get(0);
+            Double bestDistance = Double.MAX_VALUE;
+            for (int i = 0; i < availableNodes.size(); i++) {
+                Integer availableNode = availableNodes.get(i);
+                if (sensorConnections.get(availableNode).getInputsCount() >= MAX_DATA_CENTER_CONNECTIONS) {
+                    availableNodes.remove(i);
+                } else {
+                    Double distance = calculateDistance(sensorID, availableNode);
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        bestNode = availableNode;
+                    }
+                }
+            }
+
+            sensorConnections.get(sensorID).setOutputSensor(bestNode);
+            sensorConnections.get(bestNode).addInput(sensorID);
+            sensorID++;
+        }
+
+        availableNodes = new ArrayList<>();
+        for (Integer i = 0; i < getProblemSize() && sensorList.get(i).getCapacidad() == 5; i++) {
+            availableNodes.add(i);
+        }
+
+        Integer currentSensor = 0;
+        Integer sensorCapacityAux = 2;
+        for (; sensorID < sensorList.size(); sensorID++) {
+            if (availableNodes.isEmpty()) {
+                for (Integer i = 0; i < getProblemSize() && sensorList.get(i).getCapacidad() == 2; i++) {
+                    availableNodes.add(i);
+                }
+                sensorCapacityAux--;
+            }
+
+            Integer bestNode = availableNodes.get(0);
+            Double bestDistance = Double.MAX_VALUE;
+            for (int i = 0; i < availableNodes.size(); i++) {
+                Integer availableNode = availableNodes.get(i);
+                if (sensorConnections.get(availableNode).getInputsCount() < MAX_SENSOR_CONNECTIONS) {
+                    Double distance = calculateDistance(sensorID, availableNode);
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        bestNode = availableNode;
+                    }
+                } else {
+                    availableNodes.remove(i);
+                }
+            }
+
+            sensorConnections.get(sensorID).setOutputSensor(bestNode);
+            sensorConnections.get(bestNode).addInput(sensorID);
+        }
+
+        recalculateBoardData();
+
+        System.out.print(totalCost + " " + totalInformation);
     }
 
     /**
@@ -357,6 +439,23 @@ class SensorsBoard {
                 : centerList.get(outputID % sensorList.size()).getCoordY();
         return (Math.pow(sensorList.get(sensorID).getCoordX() - xOutput, 2)
                 + Math.pow(sensorList.get(sensorID).getCoordY() - yOutput, 2));
+    }
+
+    /**
+     * Calculate distance between two nodes
+     *
+     * @param firstSensor Sensor unique identifier.
+     * @param secondNode  Node unique identifier.
+     */
+    private Double calculateDistance(Integer firstSensor, Integer secondNode) {
+        Integer xOutput = secondNode < sensorList.size()
+                ? sensorList.get(secondNode).getCoordX()
+                : centerList.get(secondNode % sensorList.size()).getCoordX();
+        Integer yOutput = secondNode < sensorList.size()
+                ? sensorList.get(secondNode).getCoordY()
+                : centerList.get(secondNode % sensorList.size()).getCoordY();
+        return Math.sqrt(Math.pow(sensorList.get(firstSensor).getCoordX() - xOutput, 2)
+                + Math.pow(sensorList.get(firstSensor).getCoordY() - yOutput, 2));
     }
 
     /**
