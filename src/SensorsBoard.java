@@ -97,7 +97,7 @@ class SensorsBoard {
         }
 
         recalculateBoardData();
-        System.out.print("Initial state cost and information -> " + totalCost + " " + totalInformation);
+        System.out.println("Initial state cost and information -> " + totalCost + " " + totalInformation);
     }
 
     /**
@@ -137,7 +137,7 @@ class SensorsBoard {
         }
 
         recalculateBoardData();
-        System.out.print("Initial state cost and information -> " + totalCost + " " + totalInformation);
+        System.out.println("Initial state cost and information -> " + totalCost + " " + totalInformation);
     }
 
     /**
@@ -214,8 +214,7 @@ class SensorsBoard {
         }
 
         recalculateBoardData();
-
-        System.out.print(totalCost + " " + totalInformation);
+        System.out.println("Initial state cost and information -> " + totalCost + " " + totalInformation);
     }
 
     /**
