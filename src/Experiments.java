@@ -1,4 +1,5 @@
 import Utils.InitialStatesEnum;
+import Utils.OperatorsEnum;
 import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
@@ -33,23 +34,26 @@ class Experiments {
             Integer seedSensors = random.nextInt();
             Integer seedCenters = random.nextInt();
 
-            for (int j = -1; j < 2; j++) {
+            for (OperatorsEnum operator : OperatorsEnum.values()) {
                 SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
                 SensorsBoard.SEED_CENTERS = seedCenters;
                 SensorsBoard.SEED_SENSORS = seedSensors;
 
-                Problem p = new Problem(board, new SensorsSuccessorsHC(j), new SensorsGoal(), new SensorsHeuristic());
+                Problem p = new Problem(board, new SensorsSuccessorsHC(operator), new SensorsGoal(), new SensorsHeuristic());
                 Search alg = new HillClimbingSearch();
 
                 Long time = System.currentTimeMillis();
                 new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
 
-                if (j < 1) {
-                    writerTime.append(time.toString()).append('\t');
-                    writerCost.append(SensorsBoard.COST.toString()).append('\t');
-                    writerInfo.append(SensorsBoard.INFORMATION.toString()).append('\t');
+                if (operator != OperatorsEnum.SWITCH) {
+                    writerTime.append('\t');
+                    writerCost.append('\t');
+                    writerInfo.append('\t');
                 }
+                writerTime.append(time.toString());
+                writerCost.append(SensorsBoard.COST.toString());
+                writerInfo.append(SensorsBoard.INFORMATION.toString());
             }
             writerTime.append('\n');
             writerCost.append('\n');
@@ -78,20 +82,22 @@ class Experiments {
                 SensorsBoard.SEED_CENTERS = seedCenters;
                 SensorsBoard.SEED_SENSORS = seedSensors;
 
-                Problem p = new Problem(board, new SensorsSuccessorsHC(-1), new SensorsGoal(), new SensorsHeuristic());
+                Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
                 Search alg = new HillClimbingSearch();
 
                 Long time = System.currentTimeMillis();
                 new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
 
-                if (initialStates != InitialStatesEnum.DISTANCE_GREEDY) {
-                    writerTime.append(time.toString()).append('\t');
-                    writerCost.append(SensorsBoard.COST.toString()).append('\t');
-                    writerInfo.append(SensorsBoard.INFORMATION.toString()).append('\t');
+                if (initialStates != InitialStatesEnum.DUMMY_SEQUENTIAL) {
+                    writerTime.append('\t');
+                    writerCost.append('\t');
+                    writerInfo.append('\t');
                 }
+                writerTime.append(time.toString());
+                writerCost.append(SensorsBoard.COST.toString());
+                writerInfo.append(SensorsBoard.INFORMATION.toString());
             }
-
             writerTime.append('\n');
             writerCost.append('\n');
             writerInfo.append('\n');
@@ -114,20 +120,36 @@ class Experiments {
         Integer numSensors = 100;
         Integer numCenters = 4;
 
-        for (int i = 0; i < 3; ++i) {
-            SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
-            SensorsBoard.NUMBER_SENSORS = numSensors + i * incrementSensor;
+        Random random = new Random();
+        for (int i = 0; i < REPLICATIONS; ++i) {
             SensorsBoard.NUMBER_CENTERS = numCenters + i * incrementCenters;
+            SensorsBoard.NUMBER_SENSORS = numSensors + i * incrementSensor;
 
-            Problem p = new Problem(board, new SensorsSuccessorsHC(-1), new SensorsGoal(), new SensorsHeuristic());
-            Search alg = new HillClimbingSearch();
-            Long time = System.currentTimeMillis();
-            new SearchAgent(p, alg);
-            time = System.currentTimeMillis() - time;
+            for (int j = 0; j < REPLICATIONS; j++) {
+                SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
+                SensorsBoard.NUMBER_CENTERS = numCenters + i * incrementCenters;
+                SensorsBoard.NUMBER_SENSORS = numSensors + i * incrementSensor;
+                SensorsBoard.SEED_CENTERS = random.nextInt();
+                SensorsBoard.SEED_SENSORS = random.nextInt();
 
-            writerTime.append(time.toString()).append('\n');
-            writerCost.append(SensorsBoard.COST.toString()).append('\n');
-            writerInfo.append(SensorsBoard.INFORMATION.toString()).append('\n');
+                Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
+                Search alg = new HillClimbingSearch();
+                Long time = System.currentTimeMillis();
+                new SearchAgent(p, alg);
+                time = System.currentTimeMillis() - time;
+
+                if (j != 0) {
+                    writerTime.append('\t');
+                    writerCost.append('\t');
+                    writerInfo.append('\t');
+                }
+                writerTime.append(time.toString());
+                writerCost.append(SensorsBoard.COST.toString());
+                writerInfo.append(SensorsBoard.INFORMATION.toString());
+            }
+            writerTime.append('\n');
+            writerCost.append('\n');
+            writerInfo.append('\n');
         }
         writerTime.close();
         writerCost.close();
