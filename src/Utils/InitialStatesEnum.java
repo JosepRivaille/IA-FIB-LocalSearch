@@ -1,7 +1,7 @@
 package Utils;
 
-/**
- * Created by josepdecidrodriguez on 31/03/2017.
- */
-public class InitialStatesEnum {
+public enum InitialStatesEnum {
+    DUMMY_SEQUENTIAL,
+    SIMPLE_GREEDY,
+    DISTANCE_GREEDY
 }

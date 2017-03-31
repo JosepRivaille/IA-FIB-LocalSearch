@@ -2,9 +2,12 @@ import IA.Red.Centro;
 import IA.Red.CentrosDatos;
 import IA.Red.Sensor;
 import IA.Red.Sensores;
+import Utils.InitialStatesEnum;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static Utils.InitialStatesEnum.DUMMY_SEQUENTIAL;
 
 /**
  * Representation of the board with sensors and data centers information.
@@ -35,16 +38,27 @@ class SensorsBoard {
     /**
      * Default constructor
      */
-    SensorsBoard() {
+    SensorsBoard(InitialStatesEnum initialState, Integer seedSensors, Integer seedCenters) {
         sensorList = new ArrayList<>();
         centerList = new ArrayList<>();
 
         generateBoard();
         sensorConnections = new ArrayList<>(sensorList.size());
 
-        //generateSequentialInitialState();
-        //generateSimpleGreedyInitialState();
-        generateDistanceGreedyInitialState();
+        switch (initialState) {
+            case DUMMY_SEQUENTIAL:
+                generateDummySequentialInitialState();
+                break;
+            case SIMPLE_GREEDY:
+                generateSimpleGreedyInitialState();
+                break;
+            case DISTANCE_GREEDY:
+                generateDistanceGreedyInitialState();
+                break;
+            default:
+                System.out.println("Use args DS, SG or DG to choose the initial state generation method");
+                System.exit(2);
+        }
     }
 
     /**
@@ -75,8 +89,7 @@ class SensorsBoard {
     /**
      * Initial state generation with random sequential connections.
      */
-    @SuppressWarnings("unused")
-    private void generateSequentialInitialState() {
+    private void generateDummySequentialInitialState() {
         for (int i = 0; i < sensorList.size() - 1; i++) {
             List<Integer> inputs = new ArrayList<>();
             if (i > 0) {
@@ -103,7 +116,6 @@ class SensorsBoard {
     /**
      * Initial state generation with greedy capacity sorting strategy.
      */
-    @SuppressWarnings("unused")
     private void generateSimpleGreedyInitialState() {
         sensorList.sort((sensor1, sensor2) -> ((Double) (sensor2.getCapacidad() - sensor1.getCapacidad())).intValue());
 
@@ -143,7 +155,6 @@ class SensorsBoard {
     /**
      * Initial state generation with distance priority greedy capacity sorting strategy.
      */
-    @SuppressWarnings("unused")
     private void generateDistanceGreedyInitialState() {
         sensorList.sort((sensor1, sensor2) -> ((Double) (sensor2.getCapacidad() - sensor1.getCapacidad())).intValue());
 
@@ -184,11 +195,10 @@ class SensorsBoard {
             availableNodes.add(i);
         }
 
-        Integer currentSensor = 0;
         Integer sensorCapacityAux = 2;
         for (; sensorID < sensorList.size(); sensorID++) {
             if (availableNodes.isEmpty()) {
-                for (Integer i = 0; i < getProblemSize() && sensorList.get(i).getCapacidad() == 2; i++) {
+                for (Integer i = 0; i < getProblemSize() && sensorList.get(i).getCapacidad() == sensorCapacityAux; i++) {
                     availableNodes.add(i);
                 }
                 sensorCapacityAux--;

@@ -1,0 +1,72 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{xcolor,colortbl}
+
+\title{Búsqueda local}
+\author{Eric Dacal, Joaquim Marset, Josep de Cid}
+\date{Marzo 2017}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\definecolor{DarkGrey}{HTML}{DFDFDF}
+\definecolor{LightGrey}{HTML}{F2F2F2}
+
+\begin{document}
+
+\maketitle
+
+\section{Experimentos}
+\begin{enumerate}
+  \item \textbf{Determinar qué conjunto de operadores da mejores resultados para una función heurística que optimice el criterio de calidad del problema (3.2) con un escenario en el que el número de centros de datos es 4 y el de sensores es 100. Deberéis usar el algoritmo de Hill Climbing. Escoged una de las estrategias de inicialización de entre las que proponéis. A partir de estos resultados deberéis fijar los operadores para el resto de experimentos. Pensad que con estas proporciones, se podrán transmitir todos los datos.}
+
+  \item \textbf{Determinar qué estrategia de generación de la solución inicial da mejores resultados para la función heurística usada en el apartado anterior, con el escenario del apartado anterior y usando el algoritmo de Hill Climbing. A partir de estos resultados deberéis fijar también la estrategia de generación de la solución inicial para el resto de experimentos.}
+
+  Tenemos las siguientes estrategias de generación de soluciones iniciales:
+  \begin{itemize}
+    \item \textbf{Dummy Sequential:} Genera una solución inicial donde cada sensor se conecta con el siguiente sin ordenarlos de ninguna forma, tal y como se genera la lista con la semilla dada, hasta que el último sensor se conecta al centro de datos.
+    \item \textbf{Simple Greedy:} Genera una solución inicial ordenando todos los sensores por su capacidad en orden decreciente y siguiendo el orden, conectar cada uno con el primer nodo de mayor capacidad que permita más conexiones (priorizando centros de datos ya que tienen capacidad ilimitada).
+    \item \textbf{Distance Greedy:} Al igual que el Simple Greedy, genera una solucion ordenando los sensores por capacidad decreciente, y como diferencia, en este se conecta al nodo de mayor capacidad que se encuentre más cerca del sensor.
+  \end{itemize}
+  Podemos ver los datos de coste e información transmitida al generar las distintas soluciones iniciales en la siguiente tabla:
+  \begin{center}
+    \begin{tabular}{ | l | l | l | }
+        \hline
+        \rowcolor{DarkGrey}
+        Initial algorithm & Cost & Information \\ \hline \hline
+        Dummy Sequential & 2037413.0 & 3.0 \\ \hline
+        \rowcolor{LightGrey}
+        Simple Greedy & 758240.0 & 265.0 \\ \hline
+        Distance Greedy & 474584.0 & 265.0 \\ \hline
+    \end{tabular}
+  \end{center}
+  \begin{center}
+    \begin{tabular}{ | l | l | l | l | }
+        \hline
+        \rowcolor{DarkGrey}
+        Initial algorithm & Cost & Information & Time \\ \hline \hline
+        Dummy Sequential & 2037413.0 & 3.0 & \\ \hline
+        \rowcolor{LightGrey}
+        Simple Greedy & 758240.0 & 265.0 \\ \hline
+        Distance Greedy & 474584.0 & 265.0 \\ \hline
+    \end{tabular}
+  \end{center}
+
+  \item \textbf{Determinar los parámetros que dan mejor resultado para el Simulated Annealing con el mismo escenario, usando la misma función heurística y los operadores y la estrategia de generación de la solución inicial escogidos en los experimentos anteriores.}
+
+  \item \textbf{Dado el escenario de los apartados anteriores, estudiad como evoluciona el tiempo de ejecución para hallar la solución para valores crecientes de los parámetros siguendo la proporción 4:100. Comenzad con 4 centros de datos e incrementad el número de 2 en 2 hasta que se vea la tendencia. Usad el algoritmo de Hill Climbing y la misma función heurística que antes.}
+
+  \item \textbf{Las proporciones del primer escenario hacen que la capacidad de recibir datos sea mucho mayor que la de captura. A partir de todos los experimentos realizados, ¿hay resultados en los que no todos los centros de datos son utilizados? Si es el caso, estimad la proporción centros de datos/sensores que indican los experimentos.}
+
+  \item \textbf{Suponiendo que los centros de datos no sean costosos, podríamos estimar como afecta el añadir más centros al coste de la red. Fijando el numero de sensores en 100, realizad experimentos aumentando el número de centros de datos de dos en dos hasta 10 y medid el coste de la red de conexión, el número de centros de datos usados y el coste temporal para hallar la solución. Usad el algoritmo de Hill y el de Simulated Annealing. Climbing.}
+
+  \item \textbf{En el escenario que habéis explorado esta prácticamente asegurado el transmitir todos los datos, eso hace que el factor de la función heurística que maximiza los datos transmitidos no tenga casi efecto durante la búsqueda (es constante la mayor parte del tiempo) y que solo se tenga en cuenta el coste de la red de distribución. Ahora cambiaremos el escenario de manera que haya dos centros de datos y 100 sensores. Para buscar soluciones en este escenario, ajustad la función heurística de manera que se puedan dar distintos pesos al factor que mide la cantidad de información enviada. Usad el algoritmo de Hill Climbing en estos experimentos y responded a las siguientes preguntas:}
+  \begin{itemize}
+    \item \textbf{¿Se ha reducido el tiempo para hallar una solución?}
+    \item \textbf{Si usamos una ponderación para el factor que mide la cantidad de información enviada igual que en los primeros escenarios ¿En que proporción aumenta el coste de la red?}
+    \item \textbf{¿Cómo cambia el coste de la red en función de la ponderación que se da al envío de los datos?}
+    \item \textbf{¿Hay una ponderación a partir de la que el coste de la red ya no aumenta?}
+  \end{itemize}
+\end{enumerate}
+\end{document}
