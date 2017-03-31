@@ -7,6 +7,9 @@ import aima.search.informed.HillClimbingSearch;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 
 class Experiments {
@@ -98,7 +101,42 @@ class Experiments {
         writerInfo.close();
     }
 
+    static void increments() throws Exception {
+        String filePath = "experiments/increments/";
+        generateBufferedWriters(filePath);
+
+        writerTime.write("Time\n");
+        writerCost.write("Cost\n");
+        writerInfo.write("Information\n");
+
+        Integer incrementSensor = 50;
+        Integer incrementCenters = 2;
+        Integer numSensors = 100;
+        Integer numCenters = 4;
+
+        for (int i = 0; i < 3; ++i) {
+            SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
+            SensorsBoard.NUMBER_SENSORS = numSensors + i * incrementSensor;
+            SensorsBoard.NUMBER_CENTERS = numCenters + i * incrementCenters;
+
+            Problem p = new Problem(board, new SensorsSuccessorsHC(-1), new SensorsGoal(), new SensorsHeuristic());
+            Search alg = new HillClimbingSearch();
+            Long time = System.currentTimeMillis();
+            new SearchAgent(p, alg);
+            time = System.currentTimeMillis() - time;
+
+            writerTime.append(time.toString()).append('\n');
+            writerCost.append(SensorsBoard.COST.toString()).append('\n');
+            writerInfo.append(SensorsBoard.INFORMATION.toString()).append('\n');
+        }
+        writerTime.close();
+        writerCost.close();
+        writerInfo.close();
+    }
+
     private static void generateBufferedWriters(String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        Files.createDirectories(path);
         writerTime = new BufferedWriter(new FileWriter(filePath + "fileTime.txt"));
         writerCost = new BufferedWriter(new FileWriter(filePath + "fileCost.txt"));
         writerInfo = new BufferedWriter(new FileWriter(filePath + "fileInfo.txt"));

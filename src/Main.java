@@ -11,9 +11,6 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        Long time = System.currentTimeMillis();
-        SensorsBoard board;
-
         System.out.println("Choose experiment:");
         System.out.println("1) Operators");
         System.out.println("2) Initial state");
@@ -24,9 +21,13 @@ public class Main {
         switch (option) {
             case 1:
                 Experiments.operators();
+                break;
             case 2:
                 Experiments.initialStates();
-
+                break;
+            case 4:
+                Experiments.increments();
+                break;
         }
 
         // Create the Problem object and instantiate the search algorithm
