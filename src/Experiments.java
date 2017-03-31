@@ -4,34 +4,23 @@ import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
 import aima.search.informed.HillClimbingSearch;
 
-import java.io.File;
-import java.io.PrintWriter;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 
 class Experiments {
 
+    private static BufferedWriter writerTime;
+    private static BufferedWriter writerCost;
+    private static BufferedWriter writerInfo;
+
     static void operators() throws Exception {
         String filePath = "experiments/operators/";
-        PrintWriter writerTime, writerCost, writerInfo;
-
-        File fileTime = new File(filePath + "time.txt");
-        fileTime.getParentFile().mkdirs();
-        fileTime.createNewFile();
-
-        File fileCost = new File(filePath + "cost.txt");
-        fileCost.getParentFile().mkdirs();
-        fileCost.createNewFile();
-
-        File fileInfo = new File(filePath + "fileInfo.txt");
-        fileCost.getParentFile().mkdirs();
-        fileCost.createNewFile();
-
-        writerTime = new PrintWriter(fileTime);
-        writerCost = new PrintWriter(fileCost);
-        writerInfo = new PrintWriter(fileTime);
+        generateBufferedWriters(filePath);
 
         Random random = new Random();
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 2; i++) {
             Integer seedSensors = random.nextInt();
             Integer seedCenters = random.nextInt();
 
@@ -56,6 +45,12 @@ class Experiments {
         writerTime.close();
         writerCost.close();
         writerInfo.close();
+    }
+
+    private static void generateBufferedWriters(String filePath) throws IOException {
+        writerTime = new BufferedWriter(new FileWriter(filePath + "fileTime.txt", true));
+        writerCost = new BufferedWriter(new FileWriter(filePath + "fileCost.txt", true));
+        writerInfo = new BufferedWriter(new FileWriter(filePath + "fileInfo.txt", true));
     }
 
 }
