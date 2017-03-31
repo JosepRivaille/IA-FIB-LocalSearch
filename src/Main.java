@@ -25,6 +25,7 @@ public class Main {
             case 1:
                 Experiments.operators();
             case 2:
+                Experiments.initialStates();
 
         }
 
