@@ -21,9 +21,9 @@ class Experiments {
         String filePath = "experiments/operators/";
         generateBufferedWriters(filePath);
 
-        writerTime.write("Switch\tBoth\tSwap\t\n");
-        writerCost.write("Switch\tBoth\tSwap\t\n");
-        writerInfo.write("Switch\tBoth\tSwap\t\n");
+        writerTime.write("Switch\tBoth\tSwap\n");
+        writerCost.write("Switch\tBoth\tSwap\n");
+        writerInfo.write("Switch\tBoth\tSwap\n");
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
@@ -42,9 +42,11 @@ class Experiments {
                 new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
 
-                writerTime.append(time.toString()).append('\t');
-                writerCost.append(SensorsBoard.COST.toString()).append('\t');
-                writerInfo.append(SensorsBoard.INFORMATION.toString()).append('\t');
+                if (j < 1) {
+                    writerTime.append(time.toString()).append('\t');
+                    writerCost.append(SensorsBoard.COST.toString()).append('\t');
+                    writerInfo.append(SensorsBoard.INFORMATION.toString()).append('\t');
+                }
             }
             writerTime.append('\n');
             writerCost.append('\n');
@@ -59,9 +61,9 @@ class Experiments {
         String filePath = "experiments/initialStates/";
         generateBufferedWriters(filePath);
 
-        writerTime.write("Dummy Sequential\tSimple Greedy\tDistance Greedy\t\n");
-        writerCost.write("Dummy Sequential\tSimple Greedy\tDistance Greedy\t\n");
-        writerInfo.write("Dummy Sequential\tSimple Greedy\tDistance Greedy\t\n");
+        writerTime.write("Dummy Sequential\tSimple Greedy\tDistance Greedy\n");
+        writerCost.write("Dummy Sequential\tSimple Greedy\tDistance Greedy\n");
+        writerInfo.write("Dummy Sequential\tSimple Greedy\tDistance Greedy\n");
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
@@ -80,9 +82,11 @@ class Experiments {
                 new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
 
-                writerTime.append(time.toString()).append('\t');
-                writerCost.append(SensorsBoard.COST.toString()).append('\t');
-                writerInfo.append(SensorsBoard.INFORMATION.toString()).append('\t');
+                if (initialStates != InitialStatesEnum.DISTANCE_GREEDY) {
+                    writerTime.append(time.toString()).append('\t');
+                    writerCost.append(SensorsBoard.COST.toString()).append('\t');
+                    writerInfo.append(SensorsBoard.INFORMATION.toString()).append('\t');
+                }
             }
 
             writerTime.append('\n');
