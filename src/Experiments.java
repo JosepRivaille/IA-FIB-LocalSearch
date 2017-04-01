@@ -33,13 +33,11 @@ class Experiments {
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
-            Integer seedSensors = random.nextInt();
-            Integer seedCenters = random.nextInt();
+            SensorsBoard.SEED_CENTERS = random.nextInt();
+            SensorsBoard.SEED_SENSORS = random.nextInt();
 
             for (OperatorsEnum operator : OperatorsEnum.values()) {
                 SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
-                SensorsBoard.SEED_CENTERS = seedCenters;
-                SensorsBoard.SEED_SENSORS = seedSensors;
 
                 Problem p = new Problem(board, new SensorsSuccessorsHC(operator), new SensorsGoal(), new SensorsHeuristic());
                 Search alg = new HillClimbingSearch();
@@ -51,7 +49,7 @@ class Experiments {
                 if (operator != OperatorsEnum.SWITCH) {
                     printData("\t", "\t", "\t");
                 }
-                printData(time.toString(), SensorsBoard.COST.toString(), SensorsBoard.INFORMATION.toString());
+                printData(time.toString(), board.costHeuristic().toString(), board.informationHeuristic().toString());
             }
             printData("\n", "\n", "\n");
         }
@@ -71,15 +69,13 @@ class Experiments {
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
-            Integer seedSensors = random.nextInt();
-            Integer seedCenters = random.nextInt();
+            SensorsBoard.SEED_CENTERS = random.nextInt();
+            SensorsBoard.SEED_SENSORS = random.nextInt();
 
             for (InitialStatesEnum initialStates : InitialStatesEnum.values()) {
                 Long time = System.currentTimeMillis();
 
                 SensorsBoard board = new SensorsBoard(initialStates);
-                SensorsBoard.SEED_CENTERS = seedCenters;
-                SensorsBoard.SEED_SENSORS = seedSensors;
 
                 Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
                 Search alg = new HillClimbingSearch();
@@ -90,7 +86,7 @@ class Experiments {
                 if (initialStates != InitialStatesEnum.DUMMY_SEQUENTIAL) {
                     printData("\t", "\t", "\t");
                 }
-                printData(time.toString(), SensorsBoard.COST.toString(), SensorsBoard.INFORMATION.toString());
+                printData(time.toString(), board.costHeuristic().toString(), board.informationHeuristic().toString());
             }
             printData("\n", "\n", "\n");
         }
@@ -109,36 +105,32 @@ class Experiments {
         );
 
         Random random = new Random();
-        for (int i = 0; i < 1; i++) {
-            Integer seedCenters = random.nextInt();
-            Integer seedSensors = random.nextInt();
+        for (int i = 0; i < REPLICATIONS; i++) {
+            SensorsBoard.SEED_CENTERS = random.nextInt();
+            SensorsBoard.SEED_SENSORS = random.nextInt();
 
-            for (int j = 0; j < 1; j++) { //Num iterations
-                for (int k = 0; k < 1; k++) { //Num iterations for steps
-                    for (int l = 0; l < 4; l++) { //Variable k
-                        for (int h = 0; h < 4; h++) { //Variable lambda
-
+            for (int it = 0; it < REPLICATIONS; it++) {
+                for (int itRep = 0; itRep < REPLICATIONS; itRep++) {
+                    for (int k = 0; k < 4; k++) {
+                        for (int lambda = 0; lambda < 4; lambda++) {
                             SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
-                            SensorsBoard.SEED_CENTERS = seedCenters;
-                            SensorsBoard.SEED_SENSORS = seedSensors;
                             writerCost.append(board.costHeuristic().toString()).append("\t");
 
                             Problem p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
 
-                            Search alg = new SimulatedAnnealingSearch(1000 + 1000 * h, 100 + 100 * l, (int) (Math.pow(5, l)), 0.001 * Math.pow(10, h));
+                            Search alg = new SimulatedAnnealingSearch(1000 + 1000 * lambda, 100 + 100 * k, (int) (Math.pow(5, k)), 0.001 * Math.pow(10, lambda));
 
                             Long time = System.currentTimeMillis();
                             new SearchAgent(p, alg);
                             time = System.currentTimeMillis() - time;
 
-                            writerTime.append(time.toString()).append("\t").append(String.valueOf(1000 + 1000 * h)).append("\t").append(String.valueOf(100 + 100 * l)).append("\t").append(String.valueOf((int) (Math.pow(5, l)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, h)));
-                            writerCost.append(SensorsBoard.COST.toString()).append("\t").append(String.valueOf(1000 + 1000 * h)).append("\t").append(String.valueOf(100 + 100 * l)).append("\t").append(String.valueOf((int) (Math.pow(5, l)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, h)));
-                            writerInfo.append(SensorsBoard.INFORMATION.toString()).append("\t").append(String.valueOf(1000 + 1000 * h)).append("\t").append(String.valueOf(100 + 100 * l)).append("\t").append(String.valueOf((int) (Math.pow(5, l)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, h)));
+                            writerTime.append(time.toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
+                            writerCost.append(SensorsBoard.COST.toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
+                            writerInfo.append(SensorsBoard.INFORMATION.toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
                             printData("\n", "\n", "\n");
                         }
                     }
                 }
-
             }
         }
         closeWriters();
@@ -159,11 +151,9 @@ class Experiments {
             SensorsBoard.NUMBER_SENSORS = numSensors + i * incrementSensor;
 
             for (int j = 0; j < REPLICATIONS; j++) {
-                SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
-                SensorsBoard.NUMBER_CENTERS = numCenters + i * incrementCenters;
-                SensorsBoard.NUMBER_SENSORS = numSensors + i * incrementSensor;
                 SensorsBoard.SEED_CENTERS = random.nextInt();
                 SensorsBoard.SEED_SENSORS = random.nextInt();
+                SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
 
                 Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
                 Search alg = new HillClimbingSearch();
@@ -174,7 +164,7 @@ class Experiments {
                 if (j != 0) {
                     printData("\t", "\t", "\t");
                 }
-                printData(time.toString(), SensorsBoard.COST.toString(), SensorsBoard.INFORMATION.toString());
+                printData(time.toString(), board.costHeuristic().toString(), board.informationHeuristic().toString());
             }
             printData("\n", "\n", "\n");
         }
@@ -195,10 +185,9 @@ class Experiments {
             SensorsBoard.NUMBER_CENTERS = numCenters + i * incrementCenters;
 
             for (int j = 0; j < REPLICATIONS; j++) {
-                SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
-                SensorsBoard.NUMBER_CENTERS = numCenters + i * incrementCenters;
                 SensorsBoard.SEED_CENTERS = random.nextInt();
                 SensorsBoard.SEED_SENSORS = random.nextInt();
+                SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
 
                 Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
                 Search alg = new HillClimbingSearch();
@@ -209,7 +198,7 @@ class Experiments {
                 if (j != 0) {
                     printData("\t", "\t", "\t");
                 }
-                printData(time.toString(), SensorsBoard.COST.toString(), SensorsBoard.INFORMATION.toString());
+                printData(time.toString(), board.costHeuristic().toString(), board.informationHeuristic().toString());
             }
             printData("\n", "\n", "\n");
         }
