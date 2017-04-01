@@ -14,10 +14,10 @@ import static Utils.InitialStatesEnum.DUMMY_SEQUENTIAL;
  */
 class SensorsBoard {
 
-    static Integer NUMBER_SENSORS = 100;
-    static Integer NUMBER_CENTERS = 4;
-    static Integer SEED_SENSORS = 4321;
-    static Integer SEED_CENTERS = 1234;
+    static Integer NUMBER_SENSORS;
+    static Integer NUMBER_CENTERS;
+    static Integer SEED_SENSORS;
+    static Integer SEED_CENTERS;
 
     private static final Integer MAX_SENSOR_CONNECTIONS = 3;
     private static final Integer MAX_DATA_CENTER_CONNECTIONS = 25;
@@ -26,9 +26,6 @@ class SensorsBoard {
 
     private static List<Sensor> sensorList;
     private static List<Centro> centerList;
-
-    static Double COST;
-    static Double INFORMATION;
 
     private Double totalInformation;
     private Double totalCost;

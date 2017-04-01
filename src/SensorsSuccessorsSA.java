@@ -10,8 +10,6 @@ public class SensorsSuccessorsSA implements SuccessorFunction {
     public List getSuccessors(Object state) {
         ArrayList<Successor> childrenStates = new ArrayList<>();
         SensorsBoard board = (SensorsBoard) state;
-        SensorsBoard.COST = board.costHeuristic();
-        SensorsBoard.INFORMATION = board.informationHeuristic();
 
         Random random = new Random();
         int algorithm = random.nextInt(2);

@@ -31,6 +31,9 @@ class Experiments {
                 "Switch\tBoth\tSwap\n"
         );
 
+        SensorsBoard.NUMBER_CENTERS = 4;
+        SensorsBoard.NUMBER_SENSORS = 100;
+
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
             SensorsBoard.SEED_CENTERS = random.nextInt();
@@ -53,9 +56,7 @@ class Experiments {
             }
             printData("\n", "\n", "\n");
         }
-        writerTime.close();
-        writerCost.close();
-        writerInfo.close();
+        closeWriters();
     }
 
     static void initialStates() throws Exception {
@@ -66,6 +67,9 @@ class Experiments {
                 "Dummy Sequential\tSimple Greedy\tDistance Greedy\n",
                 "Dummy Sequential\tSimple Greedy\tDistance Greedy\n"
         );
+
+        SensorsBoard.NUMBER_CENTERS = 4;
+        SensorsBoard.NUMBER_SENSORS = 100;
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
@@ -90,9 +94,7 @@ class Experiments {
             }
             printData("\n", "\n", "\n");
         }
-        writerTime.close();
-        writerCost.close();
-        writerInfo.close();
+        closeWriters();
     }
 
     static void parameters() throws Exception {
@@ -103,6 +105,9 @@ class Experiments {
                 "Initial Cost\tCost\tTotal iterations\tPartial iterations\tk\tlambda\n",
                 "Information\tTotal iterations\tPartial iterations\tk\tlambda\n"
         );
+
+        SensorsBoard.NUMBER_CENTERS = 4;
+        SensorsBoard.NUMBER_SENSORS = 100;
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
@@ -125,8 +130,8 @@ class Experiments {
                             time = System.currentTimeMillis() - time;
 
                             writerTime.append(time.toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
-                            writerCost.append(SensorsBoard.COST.toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
-                            writerInfo.append(SensorsBoard.INFORMATION.toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
+                            writerCost.append(board.costHeuristic().toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
+                            writerInfo.append(board.informationHeuristic().toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
                             printData("\n", "\n", "\n");
                         }
                     }
@@ -139,6 +144,11 @@ class Experiments {
     static void increments() throws Exception {
         String filePath = "experiments/increments/";
         generateBufferedWriters(filePath);
+        printHeader(
+                "T1\tT2\tT3\tT4",
+                "",
+                ""
+        );
 
         Integer incrementSensor = 50;
         Integer incrementCenters = 2;
@@ -147,30 +157,29 @@ class Experiments {
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; ++i) {
-            SensorsBoard.NUMBER_CENTERS = numCenters + i * incrementCenters;
-            SensorsBoard.NUMBER_SENSORS = numSensors + i * incrementSensor;
+            SensorsBoard.SEED_CENTERS = random.nextInt();
+            SensorsBoard.SEED_SENSORS = random.nextInt();
 
             for (int j = 0; j < REPLICATIONS; j++) {
-                SensorsBoard.SEED_CENTERS = random.nextInt();
-                SensorsBoard.SEED_SENSORS = random.nextInt();
+                SensorsBoard.NUMBER_CENTERS = numCenters + j * incrementCenters;
+                SensorsBoard.NUMBER_SENSORS = numSensors + j * incrementSensor;
                 SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
 
                 Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
                 Search alg = new HillClimbingSearch();
+
                 Long time = System.currentTimeMillis();
                 new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
 
                 if (j != 0) {
-                    printData("\t", "\t", "\t");
+                    printData("\t", "", "");
                 }
-                printData(time.toString(), board.costHeuristic().toString(), board.informationHeuristic().toString());
+                printData(time.toString(), "", "");
             }
-            printData("\n", "\n", "\n");
+            printData("\n", "", "");
         }
-        writerTime.close();
-        writerCost.close();
-        writerInfo.close();
+        closeWriters();
     }
 
     static void dataCenters() throws Exception {
@@ -180,13 +189,16 @@ class Experiments {
         Integer incrementCenters = 2;
         Integer numCenters = 4;
 
+        SensorsBoard.NUMBER_SENSORS = 100;
+
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; ++i) {
-            SensorsBoard.NUMBER_CENTERS = numCenters + i * incrementCenters;
+            SensorsBoard.SEED_CENTERS = random.nextInt();
+            SensorsBoard.SEED_SENSORS = random.nextInt();
 
-            for (int j = 0; j < REPLICATIONS; j++) {
-                SensorsBoard.SEED_CENTERS = random.nextInt();
-                SensorsBoard.SEED_SENSORS = random.nextInt();
+            for (int j = 0; j < 4; j++) {
+                //TODO: FIX
+                SensorsBoard.NUMBER_CENTERS = numCenters + j * incrementCenters;
                 SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
 
                 Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
