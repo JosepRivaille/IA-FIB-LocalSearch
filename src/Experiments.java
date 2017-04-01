@@ -4,6 +4,7 @@ import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
 import aima.search.informed.HillClimbingSearch;
+import aima.search.informed.SimulatedAnnealingSearch;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -15,7 +16,7 @@ import java.util.Random;
 
 class Experiments {
 
-    private static final int REPLICATIONS = 5;
+    private static final int REPLICATIONS = 10;
 
     private static BufferedWriter writerTime;
     private static BufferedWriter writerCost;
@@ -24,7 +25,11 @@ class Experiments {
     static void operators() throws Exception {
         String filePath = "experiments/operators/";
         generateBufferedWriters(filePath);
-        printHeader("Switch\tBoth\tSwap\n");
+        printHeader(
+                "Switch\tBoth\tSwap\n",
+                "Switch\tBoth\tSwap\n",
+                "Switch\tBoth\tSwap\n"
+        );
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
@@ -58,7 +63,11 @@ class Experiments {
     static void initialStates() throws Exception {
         String filePath = "experiments/initialStates/";
         generateBufferedWriters(filePath);
-        printHeader("Dummy Sequential\tSimple Greedy\tDistance Greedy\n");
+        printHeader(
+                "Dummy Sequential\tSimple Greedy\tDistance Greedy\n",
+                "Dummy Sequential\tSimple Greedy\tDistance Greedy\n",
+                "Dummy Sequential\tSimple Greedy\tDistance Greedy\n"
+        );
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
@@ -66,6 +75,8 @@ class Experiments {
             Integer seedCenters = random.nextInt();
 
             for (InitialStatesEnum initialStates : InitialStatesEnum.values()) {
+                Long time = System.currentTimeMillis();
+
                 SensorsBoard board = new SensorsBoard(initialStates);
                 SensorsBoard.SEED_CENTERS = seedCenters;
                 SensorsBoard.SEED_SENSORS = seedSensors;
@@ -73,7 +84,6 @@ class Experiments {
                 Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
                 Search alg = new HillClimbingSearch();
 
-                Long time = System.currentTimeMillis();
                 new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
 
@@ -87,6 +97,51 @@ class Experiments {
         writerTime.close();
         writerCost.close();
         writerInfo.close();
+    }
+
+    static void parameters() throws Exception {
+        String filePath = "experiments/parameters/";
+        generateBufferedWriters(filePath);
+        printHeader(
+                "Time\tTotal iterations\tPartial iterations\tk\tlambda\n",
+                "Initial Cost\tCost\tTotal iterations\tPartial iterations\tk\tlambda\n",
+                "Information\tTotal iterations\tPartial iterations\tk\tlambda\n"
+        );
+
+        Random random = new Random();
+        for (int i = 0; i < 1; i++) {
+            Integer seedCenters = random.nextInt();
+            Integer seedSensors = random.nextInt();
+
+            for (int j = 0; j < 1; j++) { //Num iterations
+                for (int k = 0; k < 1; k++) { //Num iterations for steps
+                    for (int l = 0; l < 4; l++) { //Variable k
+                        for (int h = 0; h < 4; h++) { //Variable lambda
+
+                            SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
+                            SensorsBoard.SEED_CENTERS = seedCenters;
+                            SensorsBoard.SEED_SENSORS = seedSensors;
+                            writerCost.append(board.costHeuristic().toString()).append("\t");
+
+                            Problem p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
+
+                            Search alg = new SimulatedAnnealingSearch(1000 + 1000 * h, 100 + 100 * l, (int) (Math.pow(5, l)), 0.001 * Math.pow(10, h));
+
+                            Long time = System.currentTimeMillis();
+                            new SearchAgent(p, alg);
+                            time = System.currentTimeMillis() - time;
+
+                            writerTime.append(time.toString()).append("\t").append(String.valueOf(1000 + 1000 * h)).append("\t").append(String.valueOf(100 + 100 * l)).append("\t").append(String.valueOf((int) (Math.pow(5, l)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, h)));
+                            writerCost.append(SensorsBoard.COST.toString()).append("\t").append(String.valueOf(1000 + 1000 * h)).append("\t").append(String.valueOf(100 + 100 * l)).append("\t").append(String.valueOf((int) (Math.pow(5, l)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, h)));
+                            writerInfo.append(SensorsBoard.INFORMATION.toString()).append("\t").append(String.valueOf(1000 + 1000 * h)).append("\t").append(String.valueOf(100 + 100 * l)).append("\t").append(String.valueOf((int) (Math.pow(5, l)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, h)));
+                            printData("\n", "\n", "\n");
+                        }
+                    }
+                }
+
+            }
+        }
+        closeWriters();
     }
 
     static void increments() throws Exception {
@@ -158,7 +213,7 @@ class Experiments {
             }
             printData("\n", "\n", "\n");
         }
-        closeWritters();
+        closeWriters();
     }
 
     /*----------*/
@@ -171,16 +226,16 @@ class Experiments {
         writerInfo = new BufferedWriter(new FileWriter(filePath + "fileInfo.txt"));
     }
 
-    private static void closeWritters() throws IOException {
+    private static void closeWriters() throws IOException {
         writerTime.close();
         writerCost.close();
         writerInfo.close();
     }
 
-    private static void printHeader(String header) throws IOException {
-        writerTime.append(header);
-        writerCost.append(header);
-        writerInfo.append(header);
+    private static void printHeader(String headerTime, String headerCost, String headerInfo) throws IOException {
+        writerTime.append(headerTime);
+        writerCost.append(headerCost);
+        writerInfo.append(headerInfo);
     }
 
     private static void printData(String timeData, String costData, String infoData) throws IOException {

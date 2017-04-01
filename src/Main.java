@@ -26,6 +26,9 @@ public class Main {
             case 2:
                 Experiments.initialStates();
                 break;
+            case 3:
+                Experiments.parameters();
+                break;
             case 4:
                 Experiments.increments();
                 break;
