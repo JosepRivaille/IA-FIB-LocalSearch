@@ -16,6 +16,7 @@ public class Main {
         System.out.println("2) Initial state");
         System.out.println("3) SA parameters");
         System.out.println("4) Incrementation");
+        System.out.println("6) Increment Data Centers");
 
         Integer option = new Scanner(System.in).nextInt();
         switch (option) {
@@ -28,6 +29,8 @@ public class Main {
             case 4:
                 Experiments.increments();
                 break;
+            case 6:
+                Experiments.dataCenters();
         }
 
         // Create the Problem object and instantiate the search algorithm
