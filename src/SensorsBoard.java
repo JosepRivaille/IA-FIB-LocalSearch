@@ -487,6 +487,19 @@ class SensorsBoard {
     }
 
     /**
+     * Counts used centers.
+     *
+     * @return Number of used centers.
+     */
+    Integer countUsedCenters() {
+        Integer centersUsed = 0;
+        for (int i = getSensorsSize(); i < getProblemSize(); ++i) {
+            if (sensorConnections.get(i).getInputsCount() != 0) ++centersUsed;
+        }
+        return centersUsed;
+    }
+
+    /**
      * Gets the number of sensors.
      *
      * @return Number of sensors.
