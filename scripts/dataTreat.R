@@ -6,10 +6,21 @@ operatorsTime <- read.table(paste(filePath, "operators/fileTime.txt", sep = ""),
 operatorsCost <- read.table(paste(filePath, "operators/fileCost.txt", sep = ""), header = TRUE, sep = "\t")
 operatorsInfo <- read.table(paste(filePath, "operators/fileTime.txt", sep = ""), header = TRUE, sep = "\t")
 
-# Experment 2: Initial State
-initialStateTime <- read.table(paste(filePath, "initialStates/fileTime.txt", sep = ""), header = TRUE, sep = "\t")
-initialStateCost <- read.table(paste(filePath, "initialStates/fileCost.txt", sep = ""), header = TRUE, sep = "\t")
-initialStateInfo <- read.table(paste(filePath, "initialStates/fileTime.txt", sep = ""), header = TRUE, sep = "\t")
+### Experment 2: Initial State
+initialStateCost <- read.table(paste(filePath, "initialStates/Cost.txt", sep = ""), header = TRUE, sep = "\t")
+initialStateExps <- read.table(paste(filePath, "initialStates/Expansions.txt", sep = ""), header = TRUE, sep = "\t")
+initialStateInfo <- read.table(paste(filePath, "initialStates/Information.txt", sep = ""), header = TRUE, sep = "\t")
+initialStateTime <- read.table(paste(filePath, "initialStates/Time.txt", sep = ""), header = TRUE, sep = "\t")
+
+# Mean by initial state algorithm
+colMeans(initialStateCost)
+colMeans(initialStateExps)
+colMeans(initialStateTime)
+
+# Charts initial states
+boxplot(initialStateCost)
+boxplot(initialStateExps)
+boxplot(initialStateTime)
 
 # Experiment 3:
 parametersTime <- read.table(paste(filePath, "parameters/fileTime.txt", sep = ""), header = TRUE, sep = "\t")

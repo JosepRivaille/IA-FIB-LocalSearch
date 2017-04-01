@@ -276,7 +276,7 @@ class Experiments {
     static void heuristic() throws Exception {
         String filePath = "experiments/heuristic/";
         generateBufferedWriters(filePath, "Data");
-        bufferedWriters[0].append("Weight\tCost\tTime\n");
+        bufferedWriters[0].append("Weight\tCost\tInformation\tTime\n");
 
         SensorsBoard.NUMBER_SENSORS = 100;
         SensorsBoard.NUMBER_CENTERS = 2;
@@ -299,7 +299,8 @@ class Experiments {
                 new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
 
-                printData(SensorsBoard.INFORMATION_WEIGHT + "\t" + SensorsBoard.TOTAL_COST + "\t" + time.toString() + "\n");
+                printData(SensorsBoard.INFORMATION_WEIGHT + "\t" + SensorsBoard.TOTAL_COST + "\t"
+                        + SensorsBoard.TOTAL_INFORMATION + "\t" + time.toString() + "\n");
             }
         }
         closeWriters();
