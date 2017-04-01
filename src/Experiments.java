@@ -33,6 +33,7 @@ class Experiments {
 
         SensorsBoard.NUMBER_CENTERS = 4;
         SensorsBoard.NUMBER_SENSORS = 100;
+        SensorsBoard.INFORMATION_WEIGHT = 2.5;
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
@@ -72,6 +73,7 @@ class Experiments {
         SensorsBoard.NUMBER_CENTERS = 4;
         SensorsBoard.NUMBER_SENSORS = 100;
         SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
+        SensorsBoard.INFORMATION_WEIGHT = 2.5;
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
@@ -110,6 +112,7 @@ class Experiments {
 
         SensorsBoard.NUMBER_CENTERS = 4;
         SensorsBoard.NUMBER_SENSORS = 100;
+        SensorsBoard.INFORMATION_WEIGHT = 2.5;
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
@@ -160,6 +163,7 @@ class Experiments {
         Integer numCenters = 4;
 
         SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
+        SensorsBoard.INFORMATION_WEIGHT = 2.5;
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; ++i) {
@@ -200,6 +204,7 @@ class Experiments {
         SensorsBoard.NUMBER_CENTERS = 4;
         SensorsBoard.NUMBER_SENSORS = 100;
         SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
+        SensorsBoard.INFORMATION_WEIGHT = 2.5;
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; ++i) {
@@ -224,15 +229,17 @@ class Experiments {
         String filePath = "experiments/dataCenters/";
         generateBufferedWriters(filePath);
         printHeader(
-                "",
-                "",
-                ""
+                "THC1\tTSA1\tTHC2\tTSA2\tTHC3\tTSA3\tTHC4\tTSA4\n",
+                "CHC1\tDCHC1\tCSA1\tDCSA1\tCHC2\tDCHC2\tCSA2\tDCSA2\tCHC3\tDCHC3\tCSA3\tDCSA3\tCHC4\tDCHC4\tCSA4\tDCSA4\n",
+                "IHC1\tISA1\tIHC2\tISA2\tIHC3\tISA3\tIHC4\tISA4\n"
         );
 
         Integer incrementCenters = 2;
         Integer numCenters = 4;
 
         SensorsBoard.NUMBER_SENSORS = 100;
+        SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
+        SensorsBoard.INFORMATION_WEIGHT = 2.5;
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; ++i) {
@@ -240,8 +247,56 @@ class Experiments {
             SensorsBoard.SEED_SENSORS = random.nextInt();
 
             for (int j = 0; j < 4; j++) {
-                //TODO: FIX
                 SensorsBoard.NUMBER_CENTERS = numCenters + j * incrementCenters;
+
+                Long time = System.currentTimeMillis();
+                SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
+
+                Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
+                Search alg = new HillClimbingSearch();
+                new SearchAgent(p, alg);
+                time = System.currentTimeMillis() - time;
+
+                if (j != 0) {
+                    printData("\t", "\t", "\t");
+                }
+                printData(time.toString(), SensorsBoard.TOTAL_COST.toString() + "\t" + board.getUsedCenters(), SensorsBoard.TOTAL_INFORMATION.toString());
+
+                time = System.currentTimeMillis();
+                board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
+                p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
+                alg = new SimulatedAnnealingSearch();
+                new SearchAgent(p, alg);
+                time = System.currentTimeMillis() - time;
+
+                printData("\t", "\t", "\t");
+                printData(time.toString(), SensorsBoard.TOTAL_COST.toString() + "\t" + board.getUsedCenters(), SensorsBoard.TOTAL_INFORMATION.toString());
+            }
+            printData("\n", "\n", "\n");
+        }
+        closeWriters();
+    }
+
+    static void heuristic() throws Exception {
+        String filePath = "experiments/heuristic/";
+        generateBufferedWriters(filePath);
+        printHeader(
+                "T1\tT2\tT3\tT4\tT5\tT6\tT7\tT8\tT9\tT10\n",
+                "C1\tC2\tC3\tC4\tC5\tC6\tC7\tC8\tC9\tC10\n",
+                "I1\tI2\tI3\tI4\tI5\tI6\tI7\tI8\tI9\tI10\n"
+        );
+
+        SensorsBoard.NUMBER_SENSORS = 100;
+        SensorsBoard.NUMBER_CENTERS = 2;
+
+        Random random = new Random();
+        for (int i = 0; i < REPLICATIONS; ++i) {
+            SensorsBoard.SEED_CENTERS = random.nextInt();
+            SensorsBoard.SEED_SENSORS = random.nextInt();
+
+            Integer nWeight = 1;
+            for (int j = 0; j < REPLICATIONS; j++) {
+                SensorsBoard.INFORMATION_WEIGHT = nWeight + j * 0.2;
                 SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
 
                 Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());

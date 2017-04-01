@@ -1,3 +1,5 @@
+import Utils.InitialStatesEnum;
+import Utils.OperatorsEnum;
 import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
@@ -6,11 +8,14 @@ import aima.search.informed.SimulatedAnnealingSearch;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
+        Scanner scanner = new Scanner(System.in);
+
         System.out.println("Choose experiment:");
         System.out.println("1) Operators");
         System.out.println("2) Initial state");
@@ -18,8 +23,9 @@ public class Main {
         System.out.println("4) Incrementation");
         System.out.println("5) Proportions");
         System.out.println("6) Increment Data Centers");
+        System.out.println("7) Heuristic");
 
-        Integer option = new Scanner(System.in).nextInt();
+        Integer option = scanner.nextInt();
         switch (option) {
             case 1:
                 Experiments.operators();
@@ -39,7 +45,31 @@ public class Main {
             case 6:
                 Experiments.dataCenters();
                 break;
-        }
+            case 7:
+                Experiments.heuristic();
+                break;
+            default:
+                System.out.println("Manual search will start:");
+
+                System.out.print("Number of centers: ");
+                SensorsBoard.NUMBER_CENTERS = scanner.nextInt();
+                System.out.print("Number of centers: ");
+                SensorsBoard.NUMBER_SENSORS = scanner.nextInt();
+                System.out.print("Centers seed: ");
+                SensorsBoard.SEED_CENTERS = scanner.nextInt();
+                System.out.print("Sensor seed: ");
+                SensorsBoard.SEED_SENSORS = scanner.nextInt();
+                SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
+
+                SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
+
+                    Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
+                    Search alg = new HillClimbingSearch();
+
+                    Long time = System.currentTimeMillis();
+                    new SearchAgent(p, alg);
+                    time = System.currentTimeMillis() - time;
+                }
 
         // Create the Problem object and instantiate the search algorithm
         /*Problem p = null;
