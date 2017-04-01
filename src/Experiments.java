@@ -132,8 +132,8 @@ class Experiments {
                             time = System.currentTimeMillis() - time;
 
                             printData(
-                                    time.toString() + "\t" + String.valueOf(1000 + 1000 * lambda) + "\t" + String.valueOf(100 + 100 * k) + "\t" + String.valueOf(Math.pow(5, k)) + "\t" + String.valueOf(0.001 * Math.pow(10, lambda)) + "\n",
-                                    SensorsBoard.TOTAL_COST + "\t" + String.valueOf(1000 + 1000 * lambda) + "\t" + String.valueOf(100 + 100 * k) + "\t" + String.valueOf(Math.pow(5, k)) + "\t" + String.valueOf(0.001 * Math.pow(10, lambda)) + "\n",
+                                    time.toString() + "\t" + String.valueOf(1000 + 1000 * lambda) + "\t" + String.valueOf(100 + 100 * k) + "\t" + String.valueOf(Math.pow(5, k)) + "\t" + String.valueOf(0.001 * Math.pow(10, lambda)),
+                                    SensorsBoard.TOTAL_COST + "\t" + String.valueOf(1000 + 1000 * lambda) + "\t" + String.valueOf(100 + 100 * k) + "\t" + String.valueOf(Math.pow(5, k)) + "\t" + String.valueOf(0.001 * Math.pow(10, lambda)),
                                     SensorsBoard.TOTAL_INFORMATION + "\t" + String.valueOf(1000 + 1000 * lambda) + "\t" + String.valueOf(100 + 100 * k) + "\t" + String.valueOf(Math.pow(5, k)) + "\t" + String.valueOf(0.001 * Math.pow(10, lambda))
                             );
                             printData("\n", "\n", "\n");
