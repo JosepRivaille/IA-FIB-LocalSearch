@@ -7,11 +7,7 @@ import java.util.List;
 
 public class SensorsSuccessorsHC implements SuccessorFunction {
 
-    private OperatorsEnum chosenOperators;
-
-    SensorsSuccessorsHC(OperatorsEnum chosenOperators) {
-        this.chosenOperators = chosenOperators;
-    }
+    static OperatorsEnum CHOSEN_OPERATOR;
 
     public List getSuccessors(Object state) {
         ArrayList<Successor> childrenStates = new ArrayList<>();
@@ -21,7 +17,7 @@ public class SensorsSuccessorsHC implements SuccessorFunction {
             for (int j = 0; j < board.getProblemSize(); j++) {
                 if (i != j) {
                     SensorsBoard successorBoard = new SensorsBoard(board);
-                    switch (chosenOperators) {
+                    switch (CHOSEN_OPERATOR) {
                         case SWITCH:
                             if (successorBoard.switchConnection(i, j)) {
                                 childrenStates.add(new Successor("switch connection " + i + " - " + j, successorBoard));

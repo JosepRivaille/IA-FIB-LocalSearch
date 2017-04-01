@@ -26,9 +26,9 @@ class Experiments {
         String filePath = "experiments/operators/";
         generateBufferedWriters(filePath);
         printHeader(
-                "Switch\tBoth\tSwap\n",
-                "Switch\tBoth\tSwap\n",
-                "Switch\tBoth\tSwap\n"
+                "Switch\tSwap\tBoth\n",
+                "Switch\tSwap\tBoth\n",
+                "Switch\tSwap\tBoth\n"
         );
 
         SensorsBoard.NUMBER_CENTERS = 4;
@@ -42,7 +42,8 @@ class Experiments {
             for (OperatorsEnum operator : OperatorsEnum.values()) {
                 SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
 
-                Problem p = new Problem(board, new SensorsSuccessorsHC(operator), new SensorsGoal(), new SensorsHeuristic());
+                Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
+                SensorsSuccessorsHC.CHOSEN_OPERATOR = operator;
                 Search alg = new HillClimbingSearch();
 
                 Long time = System.currentTimeMillis();
@@ -52,7 +53,7 @@ class Experiments {
                 if (operator != OperatorsEnum.SWITCH) {
                     printData("\t", "\t", "\t");
                 }
-                printData(time.toString(), board.costHeuristic().toString(), board.informationHeuristic().toString());
+                printData(time.toString(), SensorsBoard.TOTAL_COST.toString(), SensorsBoard.TOTAL_INFORMATION.toString());
             }
             printData("\n", "\n", "\n");
         }
@@ -81,7 +82,8 @@ class Experiments {
 
                 SensorsBoard board = new SensorsBoard(initialStates);
 
-                Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
+                Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
+                SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
                 Search alg = new HillClimbingSearch();
 
                 new SearchAgent(p, alg);
@@ -90,7 +92,7 @@ class Experiments {
                 if (initialStates != InitialStatesEnum.DUMMY_SEQUENTIAL) {
                     printData("\t", "\t", "\t");
                 }
-                printData(time.toString(), board.costHeuristic().toString(), board.informationHeuristic().toString());
+                printData(time.toString(), SensorsBoard.TOTAL_COST.toString(), SensorsBoard.TOTAL_INFORMATION.toString());
             }
             printData("\n", "\n", "\n");
         }
@@ -119,7 +121,7 @@ class Experiments {
                     for (int k = 0; k < 4; k++) {
                         for (int lambda = 0; lambda < 4; lambda++) {
                             SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
-                            writerCost.append(board.costHeuristic().toString()).append("\t");
+                            writerCost.append(String.valueOf(SensorsBoard.TOTAL_COST)).append("\t");
 
                             Problem p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
 
@@ -129,9 +131,11 @@ class Experiments {
                             new SearchAgent(p, alg);
                             time = System.currentTimeMillis() - time;
 
-                            writerTime.append(time.toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
-                            writerCost.append(board.costHeuristic().toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
-                            writerInfo.append(board.informationHeuristic().toString()).append("\t").append(String.valueOf(1000 + 1000 * lambda)).append("\t").append(String.valueOf(100 + 100 * k)).append("\t").append(String.valueOf((int) (Math.pow(5, k)))).append("\t").append(String.valueOf(0.001 * Math.pow(10, lambda)));
+                            printData(
+                                    time.toString() + "\t" + String.valueOf(1000 + 1000 * lambda) + "\t" + String.valueOf(100 + 100 * k) + "\t" + String.valueOf(Math.pow(5, k)) + "\t" + String.valueOf(0.001 * Math.pow(10, lambda)) + "\n",
+                                    SensorsBoard.TOTAL_COST + "\t" + String.valueOf(1000 + 1000 * lambda) + "\t" + String.valueOf(100 + 100 * k) + "\t" + String.valueOf(Math.pow(5, k)) + "\t" + String.valueOf(0.001 * Math.pow(10, lambda)) + "\n",
+                                    SensorsBoard.TOTAL_INFORMATION + "\t" + String.valueOf(1000 + 1000 * lambda) + "\t" + String.valueOf(100 + 100 * k) + "\t" + String.valueOf(Math.pow(5, k)) + "\t" + String.valueOf(0.001 * Math.pow(10, lambda))
+                            );
                             printData("\n", "\n", "\n");
                         }
                     }
@@ -145,9 +149,9 @@ class Experiments {
         String filePath = "experiments/increments/";
         generateBufferedWriters(filePath);
         printHeader(
-                "T1\tT2\tT3\tT4",
-                "",
-                ""
+                "T1\tT2\tT3\tT4\n",
+                "C1\tC2\tC3\tC4\n",
+                "I1\tI2\tI3\tI4\n"
         );
 
         Integer incrementSensor = 50;
@@ -165,7 +169,8 @@ class Experiments {
                 SensorsBoard.NUMBER_SENSORS = numSensors + j * incrementSensor;
                 SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
 
-                Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
+                Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
+                SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
                 Search alg = new HillClimbingSearch();
 
                 Long time = System.currentTimeMillis();
@@ -173,11 +178,11 @@ class Experiments {
                 time = System.currentTimeMillis() - time;
 
                 if (j != 0) {
-                    printData("\t", "", "");
+                    printData("\t", "\t", "\t");
                 }
-                printData(time.toString(), "", "");
+                printData(time.toString(), SensorsBoard.TOTAL_COST.toString(), SensorsBoard.TOTAL_INFORMATION.toString());
             }
-            printData("\n", "", "");
+            printData("\n", "\n", "\n");
         }
         closeWriters();
     }
@@ -185,6 +190,11 @@ class Experiments {
     static void dataCenters() throws Exception {
         String filePath = "experiments/dataCenters/";
         generateBufferedWriters(filePath);
+        printHeader(
+                "",
+                "",
+                ""
+        );
 
         Integer incrementCenters = 2;
         Integer numCenters = 4;
@@ -201,7 +211,8 @@ class Experiments {
                 SensorsBoard.NUMBER_CENTERS = numCenters + j * incrementCenters;
                 SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
 
-                Problem p = new Problem(board, new SensorsSuccessorsHC(OperatorsEnum.SWITCH), new SensorsGoal(), new SensorsHeuristic());
+                Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
+                SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
                 Search alg = new HillClimbingSearch();
                 Long time = System.currentTimeMillis();
                 new SearchAgent(p, alg);
@@ -210,7 +221,7 @@ class Experiments {
                 if (j != 0) {
                     printData("\t", "\t", "\t");
                 }
-                printData(time.toString(), board.costHeuristic().toString(), board.informationHeuristic().toString());
+                printData(time.toString(), SensorsBoard.TOTAL_COST.toString(), SensorsBoard.TOTAL_INFORMATION.toString());
             }
             printData("\n", "\n", "\n");
         }

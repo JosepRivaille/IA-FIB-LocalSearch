@@ -7,8 +7,6 @@ import Utils.InitialStatesEnum;
 import java.util.ArrayList;
 import java.util.List;
 
-import static Utils.InitialStatesEnum.DUMMY_SEQUENTIAL;
-
 /**
  * Representation of the board with sensors and data centers information.
  */
@@ -18,6 +16,9 @@ class SensorsBoard {
     static Integer NUMBER_CENTERS;
     static Integer SEED_SENSORS;
     static Integer SEED_CENTERS;
+
+    static Double TOTAL_COST;
+    static Double TOTAL_INFORMATION;
 
     private static final Integer MAX_SENSOR_CONNECTIONS = 3;
     private static final Integer MAX_DATA_CENTER_CONNECTIONS = 25;
@@ -316,24 +317,6 @@ class SensorsBoard {
     /*-------------- HEURISTICS --------------*/
 
     /**
-     * Heuristic based on cost.
-     *
-     * @return Heuristic value.
-     */
-    Double costHeuristic() {
-        return totalCost;
-    }
-
-    /**
-     * Heuristic based on information.
-     *
-     * @return Heuristic value.
-     */
-    Double informationHeuristic() {
-        return totalInformation;
-    }
-
-    /**
      * Heuristic based on cost and information.
      *
      * @return Heuristic value.
@@ -424,6 +407,8 @@ class SensorsBoard {
             totalInformation += sensorConnections.get(currentCenter).getInformation();
             totalCost += sensorConnections.get(currentCenter).getCost();
         }
+        TOTAL_INFORMATION = totalInformation;
+        TOTAL_COST = totalCost;
     }
 
     /**
