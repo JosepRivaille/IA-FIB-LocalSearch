@@ -22,7 +22,7 @@ class Experiments {
     /* Experiment 1 */
     static void operators() throws Exception {
         String filePath = "experiments/operators/";
-        generateBufferedWriters(filePath, "Cost", "Information", "Time");
+        generateBufferedWriters(filePath, "Cost", "Information", "Expansions", "Time");
         for (BufferedWriter bufferedWriter : bufferedWriters) {
             bufferedWriter.append("Switch\tSwap\tBoth\n");
         }
@@ -44,15 +44,20 @@ class Experiments {
                 Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
                 Search alg = new HillClimbingSearch();
 
-                new SearchAgent(p, alg);
+                SearchAgent searchAgent = new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
 
                 if (operator != OperatorsEnum.SWITCH) {
-                    printData("\t", "\t", "\t");
+                    printData("\t", "\t", "\t", "\t");
                 }
-                printData(SensorsBoard.TOTAL_COST.toString(), SensorsBoard.TOTAL_INFORMATION.toString(), time.toString());
+                printData(
+                        SensorsBoard.TOTAL_COST.toString(),
+                        SensorsBoard.TOTAL_INFORMATION.toString(),
+                        searchAgent.getInstrumentation().getProperty("nodesExpanded"),
+                        time.toString()
+                );
             }
-            printData("\n", "\n", "\n");
+            printData("\n", "\n", "\n", "\n");
         }
         closeWriters();
     }
