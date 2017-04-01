@@ -19,6 +19,7 @@ class SensorsBoard {
 
     static Double TOTAL_COST;
     static Double TOTAL_INFORMATION;
+    static Integer USED_CENTERS;
 
     private static final Integer MAX_SENSOR_CONNECTIONS = 3;
     private static final Integer MAX_DATA_CENTER_CONNECTIONS = 25;
@@ -403,9 +404,13 @@ class SensorsBoard {
         Integer currentCenter;
         totalInformation = 0D;
         totalCost = 0D;
+        USED_CENTERS = 0;
         for (currentCenter = sensorList.size(); currentCenter < getProblemSize(); currentCenter++) {
             totalInformation += sensorConnections.get(currentCenter).getInformation();
             totalCost += sensorConnections.get(currentCenter).getCost();
+            if (sensorConnections.get(currentCenter).getInputsCount() != 0) {
+                USED_CENTERS++;
+            }
         }
         TOTAL_INFORMATION = totalInformation;
         TOTAL_COST = totalCost;
@@ -472,16 +477,13 @@ class SensorsBoard {
     }
 
     /**
-     * Counts used centers.
+     * Get center number of inputs.
      *
-     * @return Number of used centers.
+     * @param center Desired center.
+     * @return Number of center input connections.
      */
-    Integer countUsedCenters() {
-        Integer centersUsed = 0;
-        for (int i = getSensorsSize(); i < getProblemSize(); ++i) {
-            if (sensorConnections.get(i).getInputsCount() != 0) ++centersUsed;
-        }
-        return centersUsed;
+    Integer centerInputConnections(int center) {
+        return sensorConnections.get(getSensorsSize() + center).getInputsCount();
     }
 
     /**

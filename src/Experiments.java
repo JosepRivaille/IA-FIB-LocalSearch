@@ -71,6 +71,7 @@ class Experiments {
 
         SensorsBoard.NUMBER_CENTERS = 4;
         SensorsBoard.NUMBER_SENSORS = 100;
+        SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
 
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; i++) {
@@ -83,7 +84,6 @@ class Experiments {
                 SensorsBoard board = new SensorsBoard(initialStates);
 
                 Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
-                SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
                 Search alg = new HillClimbingSearch();
 
                 new SearchAgent(p, alg);
@@ -159,6 +159,8 @@ class Experiments {
         Integer numSensors = 100;
         Integer numCenters = 4;
 
+        SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
+
         Random random = new Random();
         for (int i = 0; i < REPLICATIONS; ++i) {
             SensorsBoard.SEED_CENTERS = random.nextInt();
@@ -170,7 +172,6 @@ class Experiments {
                 SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
 
                 Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
-                SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
                 Search alg = new HillClimbingSearch();
 
                 Long time = System.currentTimeMillis();
@@ -182,6 +183,38 @@ class Experiments {
                 }
                 printData(time.toString(), SensorsBoard.TOTAL_COST.toString(), SensorsBoard.TOTAL_INFORMATION.toString());
             }
+            printData("\n", "\n", "\n");
+        }
+        closeWriters();
+    }
+
+    static void proportion() throws Exception {
+        String filePath = "experiments/proportion/";
+        generateBufferedWriters(filePath);
+        printHeader(
+                "Time\n",
+                "Proportion\n",
+                "Information\n"
+        );
+
+        SensorsBoard.NUMBER_CENTERS = 4;
+        SensorsBoard.NUMBER_SENSORS = 100;
+        SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
+
+        Random random = new Random();
+        for (int i = 0; i < REPLICATIONS; ++i) {
+            SensorsBoard.SEED_CENTERS = random.nextInt();
+            SensorsBoard.SEED_SENSORS = random.nextInt();
+            SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
+
+            Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
+            Search alg = new HillClimbingSearch();
+
+            Long time = System.currentTimeMillis();
+            new SearchAgent(p, alg);
+            time = System.currentTimeMillis() - time;
+
+            printData(time.toString(), String.valueOf((double) SensorsBoard.USED_CENTERS / SensorsBoard.NUMBER_SENSORS), SensorsBoard.TOTAL_INFORMATION.toString());
             printData("\n", "\n", "\n");
         }
         closeWriters();
