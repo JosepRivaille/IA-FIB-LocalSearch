@@ -158,8 +158,9 @@ class Experiments {
     /* Experiment 4 */
     static void increments() throws Exception {
         String filePath = "experiments/increments/";
-        generateBufferedWriters(filePath, "Data");
+        generateBufferedWriters(filePath, "DataHC", "DataSA");
         bufferedWriters[0].append("Sensors\tCenters\tCost\tInformation\tTime");
+        bufferedWriters[1].append("Sensors\tCenters\tTime");
 
         SensorsBoard.INFORMATION_WEIGHT = 2.5;
         SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
@@ -188,6 +189,21 @@ class Experiments {
 
                 printData(String.valueOf(numSensors + j * incrementSensors) + "\t" + String.valueOf(numCenters + j * incrementCenters)
                         + "\t" + SensorsBoard.TOTAL_COST.toString() + "\t" + SensorsBoard.TOTAL_INFORMATION.toString() + time.toString() + "\n");
+
+                time = System.currentTimeMillis();
+                board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
+
+                p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
+                alg = new SimulatedAnnealingSearch();
+                new SearchAgent(p, alg);
+                time = System.currentTimeMillis() - time;
+
+                printData(
+                        String.valueOf(numSensors + j * incrementSensors) + "\t" + String.valueOf(numCenters + j * incrementCenters)
+                                + "\t" + SensorsBoard.TOTAL_COST.toString() + "\t" + SensorsBoard.TOTAL_INFORMATION.toString() + time.toString() + "\n",
+                        String.valueOf(numSensors + j * incrementSensors) + "\t" + String.valueOf(numCenters + j * incrementCenters)
+                                + "\t" + time.toString()
+                );
             }
         }
         closeWriters();
@@ -297,7 +313,6 @@ class Experiments {
                 SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
 
                 Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
-                SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
 
                 Search alg = new HillClimbingSearch();
                 Long time = System.currentTimeMillis();
@@ -307,6 +322,19 @@ class Experiments {
                 printData(SensorsBoard.INFORMATION_WEIGHT + "\t" + SensorsBoard.TOTAL_COST + "\t"
                         + SensorsBoard.TOTAL_INFORMATION + "\t" + time.toString() + "\n");
             }
+
+            SensorsBoard.INFORMATION_WEIGHT = 2.5;
+            SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
+
+            Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
+
+            Search alg = new HillClimbingSearch();
+            Long time = System.currentTimeMillis();
+            new SearchAgent(p, alg);
+            time = System.currentTimeMillis() - time;
+
+            printData(SensorsBoard.INFORMATION_WEIGHT + "\t" + SensorsBoard.TOTAL_COST + "\t"
+                    + SensorsBoard.TOTAL_INFORMATION + "\t" + time.toString() + "\n");
         }
         closeWriters();
     }

@@ -113,7 +113,7 @@ plotData <- c(plotData, colMeans(subset(heuristic, Weight == 2.6))[2:4])
 plotData <- c(plotData, colMeans(subset(heuristic, Weight == 2.8))[2:4])
 
 # Matrix data generator
-plotDataMatrix <- matrix(plotData, ncol = 3, nrow = 10, byrow = TRUE)
+plotDataMatrix <- matrix(plotData, ncol = 3, nrow = 11, byrow = TRUE)
 xAxis <- seq(1.0, 2.8, by = 0.2)
 rownames(plotDataMatrix) <- xAxis
 colnames(plotDataMatrix) <- c("Cost", "Information", "Time")
@@ -123,4 +123,5 @@ plot(x = xAxis, y = plotDataMatrix[,"Cost"], xlab = "Information Weight", ylab =
 plot(x = xAxis, y = plotDataMatrix[,"Information"], xlab = "Information Weight", ylab = "Information", type = "o")
 plot(x = xAxis, y = plotDataMatrix[,"Time"], xlab = "Information Weight", ylab = "Time(ms)", type = "o")
 
-
+# Comparative with 100/4 sensors/centers
+colMeans(subset(heuristic, Weight == 2.5))["Cost"] / colMeans(operatorsCost["Switch"])
