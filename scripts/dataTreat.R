@@ -101,19 +101,26 @@ heuristic <- read.table(paste(filePath, "heuristic/Data.txt", sep = ""), header 
 
 # Data parsing by equal weight
 plotData <- c()
-plotData <- c(plotData, colMeans(subset(heuristic, Weight = 1.0))[2:4])
-plotData <- c(plotData, colMeans(subset(heuristic, Weight = 1.2))[2:4])
-plotData <- c(plotData, colMeans(subset(heuristic, Weight = 1.4))[2:4])
-plotData <- c(plotData, colMeans(subset(heuristic, Weight = 1.6))[2:4])
-plotData <- c(plotData, colMeans(subset(heuristic, Weight = 1.8))[2:4])
-plotData <- c(plotData, colMeans(subset(heuristic, Weight = 2.0))[2:4])
-plotData <- c(plotData, colMeans(subset(heuristic, Weight = 2.2))[2:4])
-plotData <- c(plotData, colMeans(subset(heuristic, Weight = 2.4))[2:4])
-plotData <- c(plotData, colMeans(subset(heuristic, Weight = 2.6))[2:4])
-plotData <- c(plotData, colMeans(subset(heuristic, Weight = 2.8))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight == 1.0))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight == 1.2))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight == 1.4))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight == 1.6))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight == 1.8))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight == 2.0))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight == 2.2))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight == 2.4))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight == 2.6))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight == 2.8))[2:4])
 
+# Matrix data generator
 plotDataMatrix <- matrix(plotData, ncol = 3, nrow = 10, byrow = TRUE)
-rownames(plotDataMatrix) <- seq(1.0, 2.8, by=0.2)
+xAxis <- seq(1.0, 2.8, by = 0.2)
+rownames(plotDataMatrix) <- xAxis
 colnames(plotDataMatrix) <- c("Cost", "Information", "Time")
+
+# Plots
+plot(x = xAxis, y = plotDataMatrix[,"Cost"], xlab = "Information Weight", ylab = "Cost", type = "o")
+plot(x = xAxis, y = plotDataMatrix[,"Information"], xlab = "Information Weight", ylab = "Information", type = "o")
+plot(x = xAxis, y = plotDataMatrix[,"Time"], xlab = "Information Weight", ylab = "Time(ms)", type = "o")
 
 
