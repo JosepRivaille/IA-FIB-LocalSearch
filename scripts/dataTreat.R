@@ -62,6 +62,22 @@ hist3D(z=plotDataMatrix, border="black", xaxt = "n", yaxt = "n", xlab = "K", yla
 plotdev(theta = -65, phi = 30)
 image2D(z=plotDataMatrix, border="black", xaxt="n", yaxt="n", xlab = "K", ylab = "Lambda")
 
+iterations1000 <- colMeans(subset(parametersCost, Total.iterations == 1000))["Cost"]
+iterations2000 <- colMeans(subset(parametersCost, Total.iterations == 2000))["Cost"]
+iterations3000 <- colMeans(subset(parametersCost, Total.iterations == 3000))["Cost"]
+iterations4000 <- colMeans(subset(parametersCost, Total.iterations == 4000))["Cost"]
+iterations5000 <- colMeans(subset(parametersCost, Total.iterations == 5000))["Cost"]
+iterations6000 <- colMeans(subset(parametersCost, Total.iterations == 6000))["Cost"]
+iterations7000 <- colMeans(subset(parametersCost, Total.iterations == 7000))["Cost"]
+iterations8000 <- colMeans(subset(parametersCost, Total.iterations == 8000))["Cost"]
+iterations9000 <- colMeans(subset(parametersCost, Total.iterations == 9000))["Cost"]
+iterations10000 <- colMeans(subset(parametersCost, Total.iterations == 10000))["Cost"]
+
+iterations <- c(iterations1000, iterations2000, iterations3000, iterations4000, iterations5000,
+                iterations6000, iterations7000, iterations8000, iterations9000, iterations10000)
+
+plot(seq(from = 1000, to = 10000, by = 1000), iterations)
+
 ### Experiment 4: Increments
 incrementsTime <- read.table(paste(filePath, "increments/fileTime.txt", sep = ""), header = FALSE, sep = "\t")
 incrementsCost <- read.table(paste(filePath, "increments/fileCost.txt", sep = ""), header = FALSE, sep = "\t")
@@ -113,7 +129,7 @@ plotData <- c(plotData, colMeans(subset(heuristic, Weight == 2.6))[2:4])
 plotData <- c(plotData, colMeans(subset(heuristic, Weight == 2.8))[2:4])
 
 # Matrix data generator
-plotDataMatrix <- matrix(plotData, ncol = 3, nrow = 11, byrow = TRUE)
+plotDataMatrix <- matrix(plotData, ncol = 3, nrow = 10, byrow = TRUE)
 xAxis <- seq(1.0, 2.8, by = 0.2)
 rownames(plotDataMatrix) <- xAxis
 colnames(plotDataMatrix) <- c("Cost", "Information", "Time")
