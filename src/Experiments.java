@@ -138,8 +138,8 @@ class Experiments {
                             new SearchAgent(p, alg);
                             time = System.currentTimeMillis() - time;
 
-                            String totalIterations = String.valueOf(1000 + 1000 * lambda);
-                            String partialIterations = String.valueOf(100 + 100 * k);
+                            String totalIterations = String.valueOf(1000 + 1000 * it);
+                            String partialIterations = String.valueOf(100 + 100 * itRep);
                             String kVal = String.valueOf(Math.pow(5, k));
                             String lVal = String.valueOf(0.001 * Math.pow(10, lambda));
                             printData(
