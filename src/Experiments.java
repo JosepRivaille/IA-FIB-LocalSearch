@@ -186,9 +186,8 @@ class Experiments {
                 Search alg = new HillClimbingSearch();
                 new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
-
-                printData(String.valueOf(numSensors + j * incrementSensors) + "\t" + String.valueOf(numCenters + j * incrementCenters)
-                        + "\t" + SensorsBoard.TOTAL_COST.toString() + "\t" + SensorsBoard.TOTAL_INFORMATION.toString() + time.toString() + "\n");
+                String dataHC = String.valueOf(numSensors + j * incrementSensors) + "\t" + String.valueOf(numCenters + j * incrementCenters)
+                        + "\t" + SensorsBoard.TOTAL_COST.toString() + "\t" + SensorsBoard.TOTAL_INFORMATION.toString() + time.toString() + "\n";
 
                 time = System.currentTimeMillis();
                 board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
@@ -198,12 +197,8 @@ class Experiments {
                 new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
 
-                printData(
-                        String.valueOf(numSensors + j * incrementSensors) + "\t" + String.valueOf(numCenters + j * incrementCenters)
-                                + "\t" + SensorsBoard.TOTAL_COST.toString() + "\t" + SensorsBoard.TOTAL_INFORMATION.toString() + time.toString() + "\n",
-                        String.valueOf(numSensors + j * incrementSensors) + "\t" + String.valueOf(numCenters + j * incrementCenters)
-                                + "\t" + time.toString()
-                );
+                printData(dataHC, String.valueOf(numSensors + j * incrementSensors) + "\t" +
+                        String.valueOf(numCenters + j * incrementCenters) + "\t" + time.toString() + "\n");
             }
         }
         closeWriters();
