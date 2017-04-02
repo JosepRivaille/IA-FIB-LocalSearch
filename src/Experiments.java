@@ -132,7 +132,7 @@ class Experiments {
 
                             Problem p = new Problem(board, new SensorsSuccessorsSA(), new SensorsGoal(), new SensorsHeuristic());
 
-                            Search alg = new SimulatedAnnealingSearch(1000 + 1000 * lambda, 100 + 100 * k, (int) (Math.pow(5, k)), 0.001 * Math.pow(10, lambda));
+                            Search alg = new SimulatedAnnealingSearch(1000 + 1000 * it, 100 + 100 * itRep, (int) (Math.pow(5, k)), 0.001 * Math.pow(10, lambda));
 
                             Long time = System.currentTimeMillis();
                             new SearchAgent(p, alg);

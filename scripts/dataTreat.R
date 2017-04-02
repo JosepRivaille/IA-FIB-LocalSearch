@@ -1,5 +1,5 @@
 # Relative path where all the experiments are
-filePath <- "../experiments/"
+filePath <- "/Users/josepdecidrodriguez/Dropbox/FIB/IA/Prac/LocalSearch/experiments/"
 
 ### Experiment 1: Operators
 operatorsCost <- read.table(paste(filePath, "operators/Cost.txt", sep = ""), header = TRUE, sep = "\t")
@@ -97,3 +97,23 @@ plot(x = xAxis, y = dataCentersSATime, xlab = "Centers", ylab = "Time(ms)", type
 plot(x = xAxis, y = dataCentersSAUses, xlab = "Centers", ylab = "Used centers", type = "o")
 
 ### Experiment 7:
+heuristic <- read.table(paste(filePath, "heuristic/Data.txt", sep = ""), header = TRUE, sep = "\t")
+
+# Data parsing by equal weight
+plotData <- c()
+plotData <- c(plotData, colMeans(subset(heuristic, Weight = 1.0))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight = 1.2))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight = 1.4))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight = 1.6))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight = 1.8))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight = 2.0))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight = 2.2))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight = 2.4))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight = 2.6))[2:4])
+plotData <- c(plotData, colMeans(subset(heuristic, Weight = 2.8))[2:4])
+
+plotDataMatrix <- matrix(plotData, ncol = 3, nrow = 10, byrow = TRUE)
+rownames(plotDataMatrix) <- seq(1.0, 2.8, by=0.2)
+colnames(plotDataMatrix) <- c("Cost", "Information", "Time")
+
+
