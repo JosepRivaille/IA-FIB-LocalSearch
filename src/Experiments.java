@@ -159,8 +159,8 @@ class Experiments {
     static void increments() throws Exception {
         String filePath = "experiments/increments/";
         generateBufferedWriters(filePath, "DataHC", "DataSA");
-        bufferedWriters[0].append("Sensors\tCenters\tCost\tInformation\tTime");
-        bufferedWriters[1].append("Sensors\tCenters\tTime");
+        bufferedWriters[0].append("Sensors\tCenters\tCost\tInformation\tTime\n");
+        bufferedWriters[1].append("Sensors\tCenters\tTime\n");
 
         SensorsBoard.INFORMATION_WEIGHT = 2.5;
         SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
