@@ -159,7 +159,7 @@ class Experiments {
     static void increments() throws Exception {
         String filePath = "experiments/increments/";
         generateBufferedWriters(filePath, "DataHC", "DataSA");
-        bufferedWriters[0].append("Sensors\tCenters\tCost\tInformation\tTime\n");
+        bufferedWriters[0].append("Sensors\tCenters\tCost\tInformation\tTime\tUC\n");
         bufferedWriters[1].append("Sensors\tCenters\tTime\n");
 
         SensorsBoard.INFORMATION_WEIGHT = 2.5;
@@ -187,7 +187,8 @@ class Experiments {
                 new SearchAgent(p, alg);
                 time = System.currentTimeMillis() - time;
                 String dataHC = String.valueOf(numSensors + j * incrementSensors) + "\t" + String.valueOf(numCenters + j * incrementCenters)
-                        + "\t" + SensorsBoard.TOTAL_COST.toString() + "\t" + SensorsBoard.TOTAL_INFORMATION.toString() + time.toString() + "\n";
+                        + "\t" + SensorsBoard.TOTAL_COST.toString() + "\t" + SensorsBoard.TOTAL_INFORMATION.toString() + '\t'
+                        + time.toString() + "\t" + SensorsBoard.USED_CENTERS + "\n";
 
                 time = System.currentTimeMillis();
                 board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);

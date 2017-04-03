@@ -16,4 +16,4 @@ project in some **IDE** and generate the **JAR** there or just compile it manual
 Data generated in experiments are stored in the experiments folder, where can also be found some charts used in the
 documentation. To generate statistical reports from these data, use the **RScript** written in the scripts folder.
 
-Documentation can be also found and modified in `main.text`.
+Documentation raw text can be also found and modified in `main.text`.

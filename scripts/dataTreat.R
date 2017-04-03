@@ -79,13 +79,16 @@ iterations <- c(iterations1000, iterations2000, iterations3000, iterations4000, 
 plot(seq(from = 1000, to = 10000, by = 1000), iterations)
 
 ### Experiment 4: Increments
-incrementsTime <- read.table(paste(filePath, "increments/fileTime.txt", sep = ""), header = FALSE, sep = "\t")
-incrementsCost <- read.table(paste(filePath, "increments/fileCost.txt", sep = ""), header = FALSE, sep = "\t")
-incrementsInfo <- read.table(paste(filePath, "increments/fileInfo.txt", sep = ""), header = FALSE, sep = "\t")
+incrementsHC <- read.table(paste(filePath, "increments/DataHC.txt", sep = ""), header = TRUE, sep = "\t")
+incrementsHC4 <- c(colMeans(subset(incrementsHC, Centers == 4))["Time"])
+incrementsHC6 <- c(colMeans(subset(incrementsHC, Centers == 6))["Time"])
+incrementsHC8 <- c(colMeans(subset(incrementsHC, Centers == 8))["Time"])
+incrementsHC10 <- c(colMeans(subset(incrementsHC, Centers == 10))["Time"])
+incrementsHC12 <- c(colMeans(subset(incrementsHC, Centers == 12))["Time"])
 
-incrementsInfo <- rowMeans(incrementsInfo)
-xAxis <- seq(from = 100, to = 99 + length(incrementsInfo) * 50, by = 50)
-plot(x = xAxis, y = incrementsInfo, xlab = "Number of sensors", ylab = "Cost", type = "b")
+incrementsHC <- c(incrementsHC4,incrementsHC6,incrementsHC8,incrementsHC10,incrementsHC12)
+
+plot(x = c(4,6,8,10,12), y = incrementsHC, xlab = "Number of sensors", ylab = "Time", type = "b")
 
 ### Experiment 5: 
 
