@@ -205,39 +205,6 @@ class Experiments {
         closeWriters();
     }
 
-    static void proportion() throws Exception {
-        /*String filePath = "experiments/proportion/";
-        generateBufferedWriters(filePath, 4);
-        printHeader(
-                "Time\n",
-                "Proportion\n",
-                "Information\n"
-        );
-
-        SensorsBoard.NUMBER_CENTERS = 4;
-        SensorsBoard.NUMBER_SENSORS = 100;
-        SensorsSuccessorsHC.CHOSEN_OPERATOR = OperatorsEnum.SWITCH;
-        SensorsBoard.INFORMATION_WEIGHT = 2.5;
-
-        Random random = new Random();
-        for (int i = 0; i < REPLICATIONS; ++i) {
-            SensorsBoard.SEED_CENTERS = random.nextInt();
-            SensorsBoard.SEED_SENSORS = random.nextInt();
-            SensorsBoard board = new SensorsBoard(InitialStatesEnum.DISTANCE_GREEDY);
-
-            Problem p = new Problem(board, new SensorsSuccessorsHC(), new SensorsGoal(), new SensorsHeuristic());
-            Search alg = new HillClimbingSearch();
-
-            Long time = System.currentTimeMillis();
-            new SearchAgent(p, alg);
-            time = System.currentTimeMillis() - time;
-
-            printData(time.toString(), String.valueOf((double) SensorsBoard.USED_CENTERS / SensorsBoard.NUMBER_SENSORS), SensorsBoard.TOTAL_INFORMATION.toString());
-            printData("\n", "\n", "\n");
-        }
-        closeWriters();*/
-    }
-
     /* Experiment 6 */
     static void dataCenters() throws Exception {
         String filePath = "experiments/dataCenters/";
